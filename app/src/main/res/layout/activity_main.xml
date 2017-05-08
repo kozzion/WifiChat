@@ -1,54 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical">
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/button_holder"
         android:layout_width="match_parent"
         android:layout_height="96dp"
         android:orientation="horizontal">
 
         <Button
-            android:id="@+id/advertise_btn"
-            android:layout_width="96dp"
+            android:id="@+id/register_btn"
+            android:layout_width="0dp"
             android:layout_height="64dp"
-            android:onClick="clickAdvertise"
+            android:layout_weight="0.33"
             android:text="register" />
 
         <Button
             android:id="@+id/discover_btn"
-            android:layout_width="96dp"
+            android:layout_width="0dp"
             android:layout_height="64dp"
+            android:layout_weight="0.33"
 
             android:text="discover" />
 
         <Button
             android:id="@+id/connect_btn"
-            android:layout_width="96dp"
+            android:layout_width="0dp"
             android:layout_height="64dp"
-            android:onClick="clickConnect"
+            android:layout_weight="0.33"
             android:text="connect" />
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/status"
-        android:layout_width="fill_parent"
-        android:layout_height="200dp"
-        android:focusable="true" />
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_below="@+id/button_holder">
+
+        <TextView
+            android:id="@+id/status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:focusable="true" />
+    </ScrollView>
 
     <EditText
         android:id="@+id/chatInput"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="80dp"
+        android:layout_alignParentBottom="true"
+        android:layout_toLeftOf="@id/send_btn"
+        android:background="@android:color/darker_gray"
+        android:hint="type your message here..."
         android:inputType="text"
-        android:singleLine="true" />
+        android:maxLines="1"
+        android:padding="4dp" />
 
     <Button
         android:id="@+id/send_btn"
         android:layout_width="96dp"
         android:layout_height="64dp"
-        android:onClick="clickSend"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
         android:text="send" />
 
-</LinearLayout>
+
+</RelativeLayout>

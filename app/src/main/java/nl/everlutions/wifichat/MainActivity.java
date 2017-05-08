@@ -7,6 +7,7 @@ import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -14,11 +15,18 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements ILogger {
 
 
     @BindView(R.id.status)
     TextView mStatusView;
+    @BindView(R.id.chatInput)
+    EditText mChatInputView;
+    @BindView(R.id.discover_btn)
+    Button mDiscoverButton;
+    @BindView(R.id.register_btn)
+    Button mRegisterButton;
+
     NsdHelper mNsdHelper;
 
     private Handler mUpdateHandler;
@@ -26,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String TAG = "NsdChat";
 
     ChatConnection mConnection;
+    private boolean mIsDiscovering;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,57 +50,67 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-        mConnection = new ChatConnection(mUpdateHandler);
+        mConnection = new ChatConnection(mUpdateHandler, this);
 
         mNsdHelper = new NsdHelper(this);
         mNsdHelper.initializeNsd();
 
     }
 
+    @OnClick(R.id.register_btn)
     public void clickAdvertise(View v) {
         // Register service
         if (mConnection.getLocalPort() > -1) {
             mNsdHelper.registerService(mConnection.getLocalPort());
         } else {
-            Log.d(TAG, "ServerSocket isn't bound.");
+            sendLog("ServerSocket isn't bound.");
         }
     }
 
     @OnClick(R.id.discover_btn)
     public void clickDiscover(View v) {
-        Log.e(TAG, "joehoe");
-        mNsdHelper.discoverServices();
+        sendLog("clickDiscover ");
+
+        if (!mIsDiscovering) {
+            mDiscoverButton.setText("Discovering...");
+            mNsdHelper.discoverServices();
+        } else {
+            mDiscoverButton.setText("Discover");
+            mNsdHelper.stopDiscovery();
+        }
+        mIsDiscovering = !mIsDiscovering;
+
 
     }
 
-
+    @OnClick(R.id.connect_btn)
     public void clickConnect(View v) {
         NsdServiceInfo service = mNsdHelper.getChosenServiceInfo();
         if (service != null) {
-            Log.d(TAG, "Connecting.");
+            sendLog("Connecting.");
             mConnection.connectToServer(service.getHost(),
                     service.getPort());
         } else {
-            Log.d(TAG, "No service to connect to!");
+            sendLog("No service to connect to!");
         }
     }
 
+    @OnClick(R.id.send_btn)
     public void clickSend(View v) {
-        EditText messageView = (EditText) this.findViewById(R.id.chatInput);
-        if (messageView != null) {
-            final String messageString = messageView.getText().toString();
-            if (!messageString.isEmpty()) {
-
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mConnection.sendMessage(messageString);
-                    }
-                }).start();
-
-
-            }
-            messageView.setText("");
+        final String messageString = mChatInputView.getText().toString();
+        if (!messageString.isEmpty()) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    mConnection.sendMessage(messageString);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mChatInputView.setText("");
+                        }
+                    });
+                }
+            }).start();
         }
     }
 
@@ -108,17 +127,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        if (mNsdHelper != null) {
-            mNsdHelper.discoverServices();
-        }
-    }
-
-    @Override
     protected void onDestroy() {
         mNsdHelper.tearDown();
         mConnection.tearDown();
         super.onDestroy();
+    }
+
+    @Override
+    public void sendLog(String s) {
+        Log.e(TAG, s);
+        addChatLine(s);
     }
 }
