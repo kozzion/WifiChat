@@ -1,6 +1,5 @@
 package nl.everlutions.wifichat;
 
-import android.net.nsd.NsdServiceInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -9,7 +8,10 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ScrollView;
 import android.widget.TextView;
+
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -22,19 +24,19 @@ public class MainActivity extends AppCompatActivity implements ILogger {
     TextView mStatusView;
     @BindView(R.id.chatInput)
     EditText mChatInputView;
+
+    @BindView(R.id.host_btn)
+    Button mHostButton;
     @BindView(R.id.discover_btn)
     Button mDiscoverButton;
-    @BindView(R.id.register_btn)
-    Button mRegisterButton;
+    @BindView(R.id.scrollview)
+    ScrollView mScrollView;
 
-    NsdHelper mNsdHelper;
+
+    CommunicationManagerNDS mCommunicationManagerNDS;
 
     private Handler mUpdateHandler;
 
-    public static final String TAG = "NsdChat";
-
-    ChatConnection mConnection;
-    private boolean mIsDiscovering;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,92 +52,85 @@ public class MainActivity extends AppCompatActivity implements ILogger {
             }
         };
 
-        mConnection = new ChatConnection(mUpdateHandler, this);
-
-        mNsdHelper = new NsdHelper(this);
-        mNsdHelper.initializeNsd();
-
+        mCommunicationManagerNDS = new CommunicationManagerNDS(this, mUpdateHandler, this);
     }
 
-    @OnClick(R.id.register_btn)
-    public void clickAdvertise(View v) {
+    @OnClick(R.id.host_btn)
+    public void clickHost(View v) {
         // Register service
-        if (mConnection.getLocalPort() > -1) {
-            mNsdHelper.registerService(mConnection.getLocalPort());
+
+        if (!mCommunicationManagerNDS.mIsServerRunning) {
+            mCommunicationManagerNDS.startServer();
+            mHostButton.setText("Unhost.");
         } else {
-            sendLog("ServerSocket isn't bound.");
+            mCommunicationManagerNDS.stopServer();
+            mHostButton.setText("Hosting");
         }
     }
 
     @OnClick(R.id.discover_btn)
     public void clickDiscover(View v) {
-        sendLog("clickDiscover ");
+        log("clickDiscover ");
 
-        if (!mIsDiscovering) {
-            mDiscoverButton.setText("Discovering...");
-            mNsdHelper.discoverServices();
+        if (!mCommunicationManagerNDS.mIsDiscovering) {
+            mCommunicationManagerNDS.startDiscovering();
+            log("Discovering...");
+            mDiscoverButton.setText("Dscvrng...");
         } else {
+            mCommunicationManagerNDS.stopDiscovering();
             mDiscoverButton.setText("Discover");
-            mNsdHelper.stopDiscovery();
+            log("StopDiscovering...");
         }
-        mIsDiscovering = !mIsDiscovering;
-
-
     }
 
     @OnClick(R.id.connect_btn)
     public void clickConnect(View v) {
-        NsdServiceInfo service = mNsdHelper.getChosenServiceInfo();
-        if (service != null) {
-            sendLog("Connecting.");
-            mConnection.connectToServer(service.getHost(),
-                    service.getPort());
-        } else {
-            sendLog("No service to connect to!");
-        }
+        List<String> serviceList = mCommunicationManagerNDS.getServiceKeyList();
+        mCommunicationManagerNDS.connectToService(serviceList.get(0));
+
     }
 
     @OnClick(R.id.send_btn)
     public void clickSend(View v) {
         final String messageString = mChatInputView.getText().toString();
         if (!messageString.isEmpty()) {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    mConnection.sendMessage(messageString);
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            mChatInputView.setText("");
-                        }
-                    });
-                }
-            }).start();
+            mCommunicationManagerNDS.sendMessage(messageString);
+            mChatInputView.setText("");
         }
     }
 
     public void addChatLine(String line) {
         mStatusView.append("\n" + line);
+        mScrollView.post(new Runnable() {
+            @Override
+            public void run() {
+                mScrollView.fullScroll(ScrollView.FOCUS_DOWN);
+            }
+        });
     }
 
     @Override
     protected void onPause() {
-        if (mNsdHelper != null) {
-            mNsdHelper.stopDiscovery();
-        }
+        mCommunicationManagerNDS.stopDiscovering();
         super.onPause();
     }
 
     @Override
     protected void onDestroy() {
-        mNsdHelper.tearDown();
-        mConnection.tearDown();
+        mCommunicationManagerNDS.onDestroy();
+
         super.onDestroy();
     }
 
     @Override
-    public void sendLog(String s) {
-        Log.e(TAG, s);
-        addChatLine(s);
+    public void log(final String s) {
+        Log.e("WifiChat", s);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                addChatLine(s);
+            }
+        });
+
     }
 }

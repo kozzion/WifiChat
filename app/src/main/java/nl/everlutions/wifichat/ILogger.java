@@ -5,5 +5,5 @@ package nl.everlutions.wifichat;
  */
 
 public interface ILogger {
-    void sendLog(String s);
+    void log(String s);
 }

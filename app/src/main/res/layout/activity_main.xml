@@ -4,18 +4,18 @@
     android:layout_height="fill_parent"
     android:orientation="vertical">
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <LinearLayout
         android:id="@+id/button_holder"
         android:layout_width="match_parent"
         android:layout_height="96dp"
         android:orientation="horizontal">
 
         <Button
-            android:id="@+id/register_btn"
+            android:id="@+id/host_btn"
             android:layout_width="0dp"
             android:layout_height="64dp"
             android:layout_weight="0.33"
-            android:text="register" />
+            android:text="Host" />
 
         <Button
             android:id="@+id/discover_btn"
@@ -23,28 +23,27 @@
             android:layout_height="64dp"
             android:layout_weight="0.33"
 
-            android:text="discover" />
+            android:text="Discover" />
 
         <Button
             android:id="@+id/connect_btn"
             android:layout_width="0dp"
             android:layout_height="64dp"
             android:layout_weight="0.33"
-            android:text="connect" />
+            android:text="Connect" />
     </LinearLayout>
 
     <ScrollView
+        android:id="@+id/scrollview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
+        android:layout_above="@+id/chatInput"
         android:layout_below="@+id/button_holder">
 
         <TextView
             android:id="@+id/status"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:focusable="true" />
+            android:layout_height="wrap_content" />
     </ScrollView>
 
     <EditText
@@ -52,7 +51,8 @@
         android:layout_width="match_parent"
         android:layout_height="80dp"
         android:layout_alignParentBottom="true"
-        android:layout_toLeftOf="@id/send_btn"
+        android:layout_toLeftOf="@+id/send_btn"
+
         android:background="@android:color/darker_gray"
         android:hint="type your message here..."
         android:inputType="text"

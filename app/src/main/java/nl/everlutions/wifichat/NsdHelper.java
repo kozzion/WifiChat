@@ -17,115 +17,126 @@
 package nl.everlutions.wifichat;
 
 import android.content.Context;
-import android.net.nsd.NsdServiceInfo;
 import android.net.nsd.NsdManager;
-import android.util.Log;
+import android.net.nsd.NsdServiceInfo;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class NsdHelper {
 
-    Context mContext;
+    private ILogger mILogger;
+    private NsdManager mNsdManager;
+    private Map<String, NsdServiceInfo> mNdsServiceInfoMap;
 
-    NsdManager mNsdManager;
-    NsdManager.ResolveListener mResolveListener;
-    NsdManager.DiscoveryListener mDiscoveryListener;
-    NsdManager.RegistrationListener mRegistrationListener;
+    private NsdManager.ResolveListener mResolveListener;
+    private NsdManager.DiscoveryListener mDiscoveryListener;
+    private NsdManager.RegistrationListener mRegistrationListener;
+
+
 
     public static final String SERVICE_TYPE = "_http._tcp.";
 
-    public static final String TAG = "NsdHelper";
 //    public String mServiceName = "NsdChatEvert";
-    public String mServiceName = "NsdCha";
 
-    NsdServiceInfo mService;
 
-    public NsdHelper(Context context) {
-        mContext = context;
+
+    public NsdHelper(ILogger logger, Context context) {
+        mILogger = logger;
         mNsdManager = (NsdManager) context.getSystemService(Context.NSD_SERVICE);
-    }
+        mNdsServiceInfoMap = new HashMap<>();
 
-    public void initializeNsd() {
         initializeResolveListener();
         initializeDiscoveryListener();
         initializeRegistrationListener();
-
-//        mNsdManager.init(mContext.getMainLooper(), this);
-
     }
+
 
     public void initializeDiscoveryListener() {
         mDiscoveryListener = new NsdManager.DiscoveryListener() {
 
             @Override
             public void onDiscoveryStarted(String regType) {
-                Log.e(TAG, "Service discovery started");
+                mILogger.log("Service discovery started");
             }
 
             @Override
             public void onServiceFound(NsdServiceInfo service) {
-                Log.e(TAG, "Service discovery success" + service);
+                mILogger.log("Service discovery success" + service);
                 if (!service.getServiceType().equals(SERVICE_TYPE)) {
-                    Log.e(TAG, "Unknown Service Type: " + service.getServiceType());
-                } else if (service.getServiceName().equals(mServiceName)) {
-                    Log.e(TAG, "Same machine: " + mServiceName);
-                } else if (service.getServiceName().contains(mServiceName)){
+                    mILogger.log("Unknown Service Type: " + service.getServiceType());
+                }
+                else
+                {
                     mNsdManager.resolveService(service, mResolveListener);
                 }
             }
 
             @Override
             public void onServiceLost(NsdServiceInfo service) {
-                Log.e(TAG, "service lost" + service);
-                if (mService == service) {
-                    mService = null;
+
+                String key = service.getHost().toString() + service.getServiceName();
+                mILogger.log("service lost" + key);
+                if(mNdsServiceInfoMap.containsKey(key))
+                {
+                    mILogger.log("service removed" + key);
+                    mNdsServiceInfoMap.remove(key);
                 }
             }
             
             @Override
             public void onDiscoveryStopped(String serviceType) {
-                Log.e(TAG, "Discovery stopped: " + serviceType);
+                mILogger.log("Discovery stopped: " + serviceType);
             }
 
             @Override
             public void onStartDiscoveryFailed(String serviceType, int errorCode) {
-                Log.e(TAG, "Discovery failed: Error code:" + errorCode);
+                mILogger.log("Discovery failed: Error code:" + errorCode);
                 mNsdManager.stopServiceDiscovery(this);
             }
 
             @Override
             public void onStopDiscoveryFailed(String serviceType, int errorCode) {
-                Log.e(TAG, "Discovery failed: Error code:" + errorCode);
+                mILogger.log("Discovery failed: Error code:" + errorCode);
                 mNsdManager.stopServiceDiscovery(this);
             }
         };
     }
 
-    public void initializeResolveListener() {
+    private void initializeResolveListener() {
         mResolveListener = new NsdManager.ResolveListener() {
 
             @Override
             public void onResolveFailed(NsdServiceInfo serviceInfo, int errorCode) {
-                Log.e(TAG, "Resolve failed" + errorCode);
+                mILogger.log("Resolve failed" + errorCode);
             }
 
             @Override
             public void onServiceResolved(NsdServiceInfo serviceInfo) {
-                Log.e(TAG, "Resolve Succeeded. " + serviceInfo);
+                mILogger.log("Resolve Succeeded. " + serviceInfo);
 
-                if (serviceInfo.getServiceName().equals(mServiceName)) {
-                    Log.d(TAG, "Same IP.");
-                    return;
+                String key = serviceInfo.getHost().toString() + serviceInfo.getServiceName();
+
+                if (mNdsServiceInfoMap.containsKey(key))
+                {
+                    mILogger.log("Duplicate Service" + key);
                 }
-                mService = serviceInfo;
+                else
+                {
+                    mNdsServiceInfoMap.put(key, serviceInfo);
+                }
             }
         };
     }
 
-    public void initializeRegistrationListener() {
+    private void initializeRegistrationListener() {
         mRegistrationListener = new NsdManager.RegistrationListener() {
 
             @Override
             public void onServiceRegistered(NsdServiceInfo NsdServiceInfo) {
-                mServiceName = NsdServiceInfo.getServiceName();
+                //TODO bookkeeping on services being registered
             }
             
             @Override
@@ -143,10 +154,10 @@ public class NsdHelper {
         };
     }
 
-    public void registerService(int port) {
+    public void registerService(int port, String serviceName) {
         NsdServiceInfo serviceInfo  = new NsdServiceInfo();
         serviceInfo.setPort(port);
-        serviceInfo.setServiceName(mServiceName);
+        serviceInfo.setServiceName(serviceName);
         serviceInfo.setServiceType(SERVICE_TYPE);
         
         mNsdManager.registerService(
@@ -154,20 +165,25 @@ public class NsdHelper {
         
     }
 
-    public void discoverServices() {
-        mNsdManager.discoverServices(
-                SERVICE_TYPE, NsdManager.PROTOCOL_DNS_SD, mDiscoveryListener);
+    public void startDiscoverServices() {
+        mNsdManager.discoverServices(SERVICE_TYPE, NsdManager.PROTOCOL_DNS_SD, mDiscoveryListener);
     }
     
-    public void stopDiscovery() {
+    public void stopDiscoverServices() {
         mNsdManager.stopServiceDiscovery(mDiscoveryListener);
     }
 
-    public NsdServiceInfo getChosenServiceInfo() {
-        return mService;
+    public NsdServiceInfo getServiceInfo(String service_key)
+    {
+        return mNdsServiceInfoMap.get(service_key);
     }
     
     public void tearDown() {
         mNsdManager.unregisterService(mRegistrationListener);
+    }
+
+    public List<String> getServiceKeyList()
+    {
+        return new ArrayList(mNdsServiceInfoMap.keySet());
     }
 }
