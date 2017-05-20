@@ -7,31 +7,64 @@
     <LinearLayout
         android:id="@+id/button_holder"
         android:layout_width="match_parent"
-        android:layout_height="96dp"
-        android:orientation="horizontal">
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
-        <Button
-            android:id="@+id/host_btn"
-            android:layout_width="0dp"
-            android:layout_height="64dp"
-            android:layout_weight="0.33"
-            android:text="Host" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
 
-        <Button
-            android:id="@+id/discover_btn"
-            android:layout_width="0dp"
-            android:layout_height="64dp"
-            android:layout_weight="0.33"
+            <Button
+                android:id="@+id/host_btn"
+                android:layout_width="0dp"
+                android:layout_height="64dp"
+                android:layout_weight="0.33"
+                android:text="Host" />
 
-            android:text="Discover" />
+            <Button
+                android:id="@+id/discover_btn"
+                android:layout_width="0dp"
+                android:layout_height="64dp"
+                android:layout_weight="0.33"
 
-        <Button
-            android:id="@+id/connect_btn"
-            android:layout_width="0dp"
-            android:layout_height="64dp"
-            android:layout_weight="0.33"
-            android:text="Connect" />
+                android:text="Discover" />
+
+            <Button
+                android:id="@+id/connect_btn"
+                android:layout_width="0dp"
+                android:layout_height="64dp"
+                android:layout_weight="0.33"
+                android:text="Connect" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btn_flood"
+                android:layout_width="0dp"
+                android:layout_height="64dp"
+                android:layout_weight="0.33"
+                android:text="Flood" />
+
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="64dp"
+                android:layout_weight="0.33"
+
+                android:text="" />
+
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="64dp"
+                android:layout_weight="0.33"
+                android:text="" />
+        </LinearLayout>
     </LinearLayout>
+
 
     <ScrollView
         android:id="@+id/scrollview"

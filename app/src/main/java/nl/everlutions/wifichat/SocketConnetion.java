@@ -1,13 +1,10 @@
 package nl.everlutions.wifichat;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Random;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -17,16 +14,21 @@ import java.util.concurrent.BlockingQueue;
 
 public class SocketConnetion {
 
+    private static final int BUFFER_SIZE = 4096;
+
     private final ILogger mILogger;
     private final Socket mSocket;
     private final IMessageHandler mMessageHandler;
     private int QUEUE_CAPACITY = 10;
-    private BlockingQueue<String> mWriteQueue;
+    private BlockingQueue<byte []> mWriteQueue;
     //private InetAddress mAddress;
     //private int mPort;
 
     private Thread mWriteThread;
     private Thread mReadThread;
+
+    //TODO temp
+    Random random;
 
     public SocketConnetion(ILogger ilogger, Socket socket, IMessageHandler messageHandler) {
 
@@ -46,33 +48,46 @@ public class SocketConnetion {
         mWriteThread.start();
         mReadThread = new Thread(new ReadRunnable());
         mReadThread.start();
+
+        random = new Random();
+    }
+
+    public void queueRandom() {
+        byte [] byte_message = new byte [BUFFER_SIZE];
+        random.nextBytes(byte_message);
+        //TODO random chars
+        queueMessage(byte_message);
     }
 
 
-
     class ReadRunnable implements Runnable {
-
-        private BufferedReader input;
 
         @Override
         public void run() {
 
             try {
-                input = new BufferedReader(new InputStreamReader(mSocket.getInputStream()));
                 while (!Thread.currentThread().isInterrupted()) {
+                    byte [] readBuffer = new byte [BUFFER_SIZE];
+                    int bytesRead = mSocket.getInputStream().read(readBuffer);
 
-                    String messageStr = null;
-                    messageStr = input.readLine();
-                    if (messageStr != null) {
-                        mILogger.log("Read from the stream: " + messageStr);
-                        mMessageHandler.handleMessage(messageStr.getBytes());
+                    if (bytesRead != 0)
+                    {
+                        if(bytesRead == BUFFER_SIZE)
+                        {
+                            mMessageHandler.handleMessage(readBuffer);
+                        }
+                        else
+                        {
+                            byte [] readBufferShort = new byte [bytesRead];
+                            System.arraycopy(readBuffer, 0, readBufferShort, 0 , bytesRead);
+                            mMessageHandler.handleMessage(readBufferShort);
+                        }
+
                     } else {
-                        mILogger.log("messageStr is null");
+                        mILogger.log("Nothing was read");
                         break;
                     }
                 }
-                input.close();
-
             } catch (IOException e)
             {
                 mILogger.log("Read loop error");
@@ -94,8 +109,8 @@ public class SocketConnetion {
 
             while (true) {
                 try {
-                    String msg = mWriteQueue.take();
-                    writeMessage(msg);
+                    writeMessage(mWriteQueue.take());
+
                 } catch (InterruptedException ie) {
                     mILogger.log("Message sending loop interrupted, exiting");
                 }
@@ -103,11 +118,12 @@ public class SocketConnetion {
         }
     }
 
-    public void queueMessage(String message) {
+    public void queueMessage(byte [] message) {
+        //TODO check that message is of buffersize and padd if not
         mWriteQueue.offer(message);
     }
 
-    private void writeMessage(String message)
+    private void writeMessage(byte [] message)
     {
         try {
             if (mSocket == null) {
@@ -115,11 +131,8 @@ public class SocketConnetion {
             } else if (mSocket.getOutputStream() == null) {
                 mILogger.log("Socket output stream is null, wtf?");
             }
-
-            PrintWriter out = new PrintWriter(
-                    new BufferedWriter(
-                            new OutputStreamWriter(mSocket.getOutputStream())), true);
-            out.println(message);
+            OutputStream out = mSocket.getOutputStream();
+            out.write(message);
             out.flush();
         } catch (UnknownHostException e) {
             mILogger.log("Unknown Host");

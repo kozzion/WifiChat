@@ -32,6 +32,10 @@ public class CommunicationManagerNDS implements IMessageHandler
     SocketConnetion mServerConnection = null;
     Map<String, SocketConnetion> mClientConnectionMap = null;
 
+    // TODO: temp
+    int mBytesReceveidSinceLastUpdate;
+    long mTimeOfLastMessage;
+    long mTimeOfLastUodate;
 
     public CommunicationManagerNDS(ILogger iLogger, Handler handler, Context context)
     {
@@ -39,6 +43,8 @@ public class CommunicationManagerNDS implements IMessageHandler
         this.mHandler = handler;
         this.mNsdHelper = new NsdHelper(iLogger, context);
         this.mClientConnectionMap = new HashMap<>();
+
+
     }
 
     public void addClientSocket(Socket socket)
@@ -53,17 +59,52 @@ public class CommunicationManagerNDS implements IMessageHandler
         mClientConnectionMap.put(key, new SocketConnetion(mILogger,socket,this));
 
         //TODO add thread
+
+
+    }
+
+    public void floodSocket()
+    {
+        //TODO temp
+        mILogger.log("floodSocket");
+        if(mServerConnection == null) {
+            mILogger.log("This is not a connected client");
+            throw new RuntimeException("This is not a connected client");
+        }
+        else{
+            new Thread(new Runnable() {
+                @Override
+                public void run()
+                {
+                    while (true) {
+                        mServerConnection.queueRandom();
+                    }
+                }
+            }).start();
+        }
     }
 
     @Override
     public void handleMessage(byte[] messageBytes)
     {
-        Bundle messageBundle = new Bundle();
-        messageBundle.putString("msg", new String(messageBytes));
+        long currentTime = System.currentTimeMillis();
+        mBytesReceveidSinceLastUpdate += messageBytes.length;
 
-        Message message = new Message();
-        message.setData(messageBundle);
-        mHandler.sendMessage(message);
+
+        if(1000 < currentTime - mTimeOfLastUodate)
+        {
+            double bytesPerSecond =  mBytesReceveidSinceLastUpdate / ((currentTime - mTimeOfLastUodate) / 1000.0);
+
+            Bundle messageBundle = new Bundle();
+            messageBundle.putString("msg", "bytes per second: " + bytesPerSecond);
+
+            Message message = new Message();
+            message.setData(messageBundle);
+            mHandler.sendMessage(message);
+            mTimeOfLastUodate = currentTime;
+            mBytesReceveidSinceLastUpdate = 0;
+        }
+        //mTimeOfLastMessage = System.currentTimeMillis();
     }
 
     public void startServer() {
@@ -129,12 +170,12 @@ public class CommunicationManagerNDS implements IMessageHandler
             for(SocketConnetion client_connetion : mClientConnectionMap.values())
             {
                 mILogger.log("sendMessage to client");
-                client_connetion.queueMessage(messageString);
+                client_connetion.queueMessage(messageString.getBytes());
             }
         }
         else        {
             mILogger.log("sendMessage to server");
-            mServerConnection.queueMessage(messageString);
+            mServerConnection.queueMessage(messageString.getBytes());
         }
     }
 

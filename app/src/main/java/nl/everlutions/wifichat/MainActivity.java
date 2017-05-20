@@ -27,6 +27,8 @@ public class MainActivity extends AppCompatActivity implements ILogger {
 
     @BindView(R.id.host_btn)
     Button mHostButton;
+    @BindView(R.id.btn_flood)
+    Button mFloodButton;
     @BindView(R.id.discover_btn)
     Button mDiscoverButton;
     @BindView(R.id.scrollview)
@@ -53,6 +55,11 @@ public class MainActivity extends AppCompatActivity implements ILogger {
         };
 
         mCommunicationManagerNDS = new CommunicationManagerNDS(this, mUpdateHandler, this);
+    }
+
+    @OnClick(R.id.btn_flood)
+    public void clickFlood(){
+        mCommunicationManagerNDS.floodSocket();
     }
 
     @OnClick(R.id.host_btn)
