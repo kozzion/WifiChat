@@ -10,6 +10,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.List;
 
@@ -95,6 +96,15 @@ public class MainActivity extends AppCompatActivity implements ILogger {
         List<String> serviceList = mCommunicationManagerNDS.getServiceKeyList();
         mCommunicationManagerNDS.connectToService(serviceList.get(0));
 
+    }
+
+    @OnClick(R.id.btn_play)
+    public void clickPlay(View v) {
+        Toast.makeText(this, "need to code", Toast.LENGTH_SHORT).show();
+    }
+    @OnClick(R.id.btn_record)
+    public void clickRecord(View v) {
+        Toast.makeText(this, "need to code", Toast.LENGTH_SHORT).show();
     }
 
     @OnClick(R.id.send_btn)

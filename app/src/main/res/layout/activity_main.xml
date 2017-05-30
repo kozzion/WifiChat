@@ -51,17 +51,19 @@
                 android:text="Flood" />
 
             <Button
+                android:id="@+id/btn_record"
                 android:layout_width="0dp"
                 android:layout_height="64dp"
                 android:layout_weight="0.33"
 
-                android:text="" />
+                android:text="Record" />
 
             <Button
+                android:id="@+id/btn_play"
                 android:layout_width="0dp"
                 android:layout_height="64dp"
                 android:layout_weight="0.33"
-                android:text="" />
+                android:text="Play" />
         </LinearLayout>
     </LinearLayout>
 
