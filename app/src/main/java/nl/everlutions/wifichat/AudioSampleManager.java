@@ -11,13 +11,14 @@ import android.util.Log;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+import nl.everlutions.wifichat.handler.ArrayTranscoderShortShort;
+
 /**
  * Created by jaapo on 26-5-2017.
  */
 
-public class AudioSampleManager implements IMessageHandler
+public class AudioSampleManager
 {
-
     private static final int SAMPLE_RATE = 44100;
     private static final int QUEUE_CAPACITY = 1000;
 
@@ -30,7 +31,6 @@ public class AudioSampleManager implements IMessageHandler
     public int mBufferSizeRecord;
 
     public ArrayTranscoderShortShort mTranscoderPlay;
-    public ArrayTranscoderByteShort mTranscoderPlayBytes;
 
 
     public MainActivity mMainActivity;
@@ -55,7 +55,6 @@ public class AudioSampleManager implements IMessageHandler
         }
 
         mTranscoderPlay = new ArrayTranscoderShortShort(mBufferSizePlay, this);
-        mTranscoderPlayBytes = new ArrayTranscoderByteShort(mBufferSizePlay, mTranscoderPlay);
     }
 
 

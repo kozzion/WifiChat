@@ -15,12 +15,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import nl.everlutions.wifichat.handler.IMessageHandlerByteArray;
+
+import static android.R.id.message;
+
 /**
  * Created by jaapo on 14-5-2017.
  */
 
-public class CommunicationManagerNDS implements IMessageHandler {
-    private final MainActivity mMainActivity;
+public class CommunicationManagerNDS implements ICommunicationManager {
+    private final ILogger mLogger;
     private final Handler mHandler;
     private final NsdHelper mNsdHelper;
 
@@ -33,28 +37,32 @@ public class CommunicationManagerNDS implements IMessageHandler {
     SocketConnetion mServerConnection = null;
     Map<String, SocketConnetion> mClientConnectionMap = null;
 
+
+    Map<Integer, Map<Integer, IMessageHandlerByteArray>> mHandlers;
+
     // TODO: temp
     int mBytesReceveidSinceLastUpdate;
     long mTimeOfLastMessage;
     long mTimeOfLastUodate;
 
-    public CommunicationManagerNDS(MainActivity iLogger, Handler handler, Context context) {
-        this.mMainActivity = iLogger;
+    public CommunicationManagerNDS(ILogger iLogger, Handler handler, Context context) {
+        this.mLogger = iLogger;
         this.mHandler = handler;
         this.mNsdHelper = new NsdHelper(iLogger, context);
         this.mClientConnectionMap = new HashMap<>();
-
-
+        this.mHandlers = new HashMap<>();
     }
 
+
+
     public void addClientSocket(Socket socket) {
-        mMainActivity.log("addClientSocket");
+        mLogger.log("addClientSocket");
         String key = socket.getInetAddress().toString();
         if (mClientConnectionMap.containsKey(key)) {
-            mMainActivity.log("Duplciate connetion: " + key);
+            mLogger.log("Duplciate connetion: " + key);
         }
-        mMainActivity.log("Connected: " + key);
-        mClientConnectionMap.put(key, new SocketConnetion(mMainActivity, socket, this));
+        mLogger.log("Connected: " + key);
+        mClientConnectionMap.put(key, new SocketConnetion(mLogger, socket, this));
 
         //TODO add thread
 
@@ -63,9 +71,9 @@ public class CommunicationManagerNDS implements IMessageHandler {
 
     public void floodSocket() {
         //TODO temp
-        mMainActivity.log("floodSocket");
+        mLogger.log("floodSocket");
         if (mServerConnection == null) {
-            mMainActivity.log("This is not a connected client");
+            mLogger.log("This is not a connected client");
             throw new RuntimeException("This is not a connected client");
         } else {
             new Thread(new Runnable() {
@@ -79,18 +87,14 @@ public class CommunicationManagerNDS implements IMessageHandler {
         }
     }
 
-
     @Override
-    public void handleMessage(short[] messageBytes) {
-        //todo: NEEDS REFACTOR
-    }
+    public void handle(int type, int source, byte[] byteMessage) {
+        mHandlers.get(type).get(source).handle(byteMessage);
 
-    @Override
-    public void handleMessage(byte[] messageBytes) {
         long currentTime = System.currentTimeMillis();
-        mBytesReceveidSinceLastUpdate += messageBytes.length;
 
-        mMainActivity.mAudioSampleManager.mTranscoderPlayBytes.transCode(messageBytes, messageBytes.length);
+
+        mBytesReceveidSinceLastUpdate += byteMessage.length;
 
         if (1000 < currentTime - mTimeOfLastUodate) {
             double bytesPerSecond = mBytesReceveidSinceLastUpdate / ((currentTime - mTimeOfLastUodate) / 1000.0);
@@ -105,11 +109,13 @@ public class CommunicationManagerNDS implements IMessageHandler {
             mBytesReceveidSinceLastUpdate = 0;
         }
         //mTimeOfLastMessage = System.currentTimeMillis();
+
     }
+
 
     public void startServer() {
         //TODO
-        mMainActivity.log("Server started");
+        mLogger.log("Server started");
 
         //TODO check and handle if mServerSocket is not null
 
@@ -128,18 +134,18 @@ public class CommunicationManagerNDS implements IMessageHandler {
     }
 
     public void stopServer() {
-        mMainActivity.log("Does nothing");
+        mLogger.log("Does nothing");
     }
 
     public void startDiscovering() {
-        mMainActivity.log("startDiscovering");
+        mLogger.log("startDiscovering");
         mNsdHelper.startDiscoverServices();
         mIsDiscovering = true;
 
     }
 
     public void stopDiscovering() {
-        mMainActivity.log("stopDiscovering");
+        mLogger.log("stopDiscovering");
         mNsdHelper.stopDiscoverServices();
         mIsDiscovering = false;
     }
@@ -151,9 +157,9 @@ public class CommunicationManagerNDS implements IMessageHandler {
                 NsdServiceInfo info = mNsdHelper.getServiceInfo(serviceKey);
                 try {
                     //TODO what if mServerConnection is not null
-                    mServerConnection = new SocketConnetion(mMainActivity, new Socket(info.getHost(), info.getPort()), CommunicationManagerNDS.this);
+                    mServerConnection = new SocketConnetion(mLogger, new Socket(info.getHost(), info.getPort()), CommunicationManagerNDS.this);
                 } catch (IOException e) {
-                    mMainActivity.log("IOE on connect to server" + e.getMessage());
+                    mLogger.log("IOE on connect to server" + e.getMessage());
                     e.printStackTrace();
                 }
             }
@@ -164,11 +170,11 @@ public class CommunicationManagerNDS implements IMessageHandler {
     public void sendMessage(String messageString) {
         if (mIsServerRunning) {
             for (SocketConnetion client_connetion : mClientConnectionMap.values()) {
-                mMainActivity.log("sendMessage to client");
+                mLogger.log("sendMessage to client");
                 client_connetion.queueMessage(messageString.getBytes());
             }
         } else {
-            mMainActivity.log("sendMessage to server");
+            mLogger.log("sendMessage to server");
             mServerConnection.queueMessage(messageString.getBytes());
         }
     }
@@ -186,9 +192,9 @@ public class CommunicationManagerNDS implements IMessageHandler {
 
     public void queueRecording(final short[] audioRecordBuffer, final int toWriteCount) {
         //TODO temp
-        mMainActivity.log("queueRecording");
+        mLogger.log("queueRecording");
         if (mServerConnection == null) {
-            mMainActivity.log("This is not a connected client");
+            mLogger.log("This is not a connected client");
             throw new RuntimeException("This is not a connected client");
         } else {
 
@@ -198,6 +204,7 @@ public class CommunicationManagerNDS implements IMessageHandler {
         }
     }
 
+
     class ServerRunnable implements Runnable {
 
         @Override
@@ -205,11 +212,11 @@ public class CommunicationManagerNDS implements IMessageHandler {
 
             try {
                 while (!Thread.currentThread().isInterrupted()) {
-                    mMainActivity.log("ServerSocket Created, awaiting connection");
+                    mLogger.log("ServerSocket Created, awaiting connection");
                     addClientSocket(mServerSocket.accept());
                 }
             } catch (IOException e) {
-                mMainActivity.log("Error creating ServerSocket: " + e.getLocalizedMessage());
+                mLogger.log("Error creating ServerSocket: " + e.getLocalizedMessage());
                 e.printStackTrace();
             }
         }

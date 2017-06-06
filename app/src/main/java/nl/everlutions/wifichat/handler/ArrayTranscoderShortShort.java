@@ -1,6 +1,6 @@
-package nl.everlutions.wifichat;
+package nl.everlutions.wifichat.handler;
 
-import android.util.Log;
+import nl.everlutions.wifichat.handler.IMessageHandlerShortArray;
 
 /**
  * Created by jaapo on 30-5-2017.
@@ -9,11 +9,11 @@ import android.util.Log;
 public class ArrayTranscoderShortShort
 {
     private short [] mCurrentArray;
-    private IMessageHandler mHandler;
+    private IMessageHandlerShortArray mHandler;
     private int mOutputSize;
     private int mWriteIndex;
 
-    public ArrayTranscoderShortShort(int outputSize, IMessageHandler handler)
+    public ArrayTranscoderShortShort(int outputSize, IMessageHandlerShortArray handler)
     {
         mOutputSize = outputSize;
         mHandler = handler;
@@ -24,15 +24,15 @@ public class ArrayTranscoderShortShort
     public void transCode(short [] input, int toWriteCount)
     {
         //int toWriteCount = record.read(audioRecordBuffer, 0, audioRecordBuffer.length);
-        Log.e("transCode", "transCode");
+        //Log.e("transCode", "transCode");
         int readIndex = 0;
         while (0 < toWriteCount)
         {
             int spaceRemaining = mOutputSize - mWriteIndex;
             if( mWriteIndex == mOutputSize)
             {
-                Log.e("transCode", "queue all");
-                mHandler.handleMessage(mCurrentArray);
+                //Log.e("transCode", "queue all");
+                mHandler.handle(mCurrentArray);
                 mCurrentArray = new short[mOutputSize];
                 mWriteIndex = 0;
             }
@@ -40,14 +40,10 @@ public class ArrayTranscoderShortShort
             {
                 System.arraycopy(input, readIndex, mCurrentArray, mWriteIndex, toWriteCount);
                 mWriteIndex += toWriteCount;
-                Log.e("transCode", "write all");
-                Log.e("transCode", "mReadIndex: " + readIndex);
-                Log.e("transCode", "mWriteIndex: " + mWriteIndex);
 
                 if( mWriteIndex == mOutputSize)
                 {
-                    Log.e("transCode", "queue all");
-                    mHandler.handleMessage(mCurrentArray);
+                    mHandler.handle(mCurrentArray);
                     mCurrentArray = new short[mOutputSize];
                     mWriteIndex = 0;
                 }
@@ -59,9 +55,6 @@ public class ArrayTranscoderShortShort
                 toWriteCount -=  spaceRemaining;
                 readIndex +=  spaceRemaining;
                 mWriteIndex +=  spaceRemaining;
-                Log.e("transCode", "write some");
-                Log.e("transCode", "readIndex: " + readIndex);
-                Log.e("transCode", "mWriteIndex: " + mWriteIndex);
             }
         }
     }

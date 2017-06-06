@@ -1,5 +1,6 @@
 package nl.everlutions.wifichat;
 
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
@@ -14,11 +15,17 @@ import java.util.concurrent.BlockingQueue;
 
 public class SocketConnetion {
 
+
     private static final int BUFFER_SIZE = 4096;
 
     private final ILogger mILogger;
     private final Socket mSocket;
-    private final IMessageHandler mMessageHandler;
+    private final int mSocketID;
+    private final ICommunicationManager mCommunicationManager;
+    private final DataInputStream mDataInputStream;
+
+
+
     private int QUEUE_CAPACITY = 10;
     private BlockingQueue<byte []> mWriteQueue;
     //private InetAddress mAddress;
@@ -27,19 +34,28 @@ public class SocketConnetion {
     private Thread mWriteThread;
     private Thread mReadThread;
 
+
+    private int mCurrentMessageLength;
+    private int mCurrentMessageType ;
     //TODO temp
     Random random;
 
-    public SocketConnetion(ILogger ilogger, Socket socket, IMessageHandler messageHandler) {
+    public SocketConnetion(ILogger ilogger, Socket socket, int socketID, ICommunicationManager communicationManager) {
 
         ilogger.log("Creating chatClient");
-        if ((ilogger == null) ||(socket == null) || (messageHandler == null)){
+        if ((ilogger == null) ||(socket == null) || (communicationManager == null)){
             throw new RuntimeException("Error null argument");
         }
 
         this.mILogger = ilogger;
         this.mSocket = socket;
-        this.mMessageHandler = messageHandler;
+        this.mSocketID = socketID;
+        this.mCommunicationManager = communicationManager;
+        try {
+            this.mDataInputStream = new DataInputStream(mSocket.getInputStream());
+        } catch (IOException e) {
+            throw new RuntimeException("Stream wrap failed");
+        }
 
         //this.mAddress = socket.getInetAddress();
         //this.mPort = socket.getPort();
@@ -66,27 +82,14 @@ public class SocketConnetion {
         public void run() {
 
             try {
-                while (!Thread.currentThread().isInterrupted()) {
-                    byte [] readBuffer = new byte [BUFFER_SIZE];
-                    int bytesRead = mSocket.getInputStream().read(readBuffer);
 
-                    if (bytesRead != 0)
-                    {
-                        if(bytesRead == BUFFER_SIZE)
-                        {
-                            mMessageHandler.handleMessage(readBuffer);
-                        }
-                        else
-                        {
-                            byte [] readBufferShort = new byte [bytesRead];
-                            System.arraycopy(readBuffer, 0, readBufferShort, 0 , bytesRead);
-                            mMessageHandler.handleMessage(readBufferShort);
-                        }
-
-                    } else {
-                        mILogger.log("Nothing was read");
-                        break;
-                    }
+                while (!Thread.currentThread().isInterrupted())
+                {
+                    int mCurrentMessageLength = mDataInputStream.readInt();
+                    int mCurrentMessageType = mDataInputStream.readInt();
+                    byte [] byteMessage = new byte [mCurrentMessageLength];
+                    mDataInputStream.readFully(byteMessage);
+                    mCommunicationManager.handle(mSocketID, mCurrentMessageType, byteMessage);
                 }
             } catch (IOException e)
             {

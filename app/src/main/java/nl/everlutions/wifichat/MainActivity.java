@@ -51,6 +51,7 @@ public class MainActivity extends AppCompatActivity implements ILogger {
 
     public AudioSampleManager mAudioSampleManager;
     public CommunicationManagerNDS mCommunicationManagerNDS;
+
     // Requesting permission to RECORD_AUDIO
     private boolean permissionToRecordAccepted = false;
     private String[] permissions = {Manifest.permission.RECORD_AUDIO};
@@ -67,8 +68,6 @@ public class MainActivity extends AppCompatActivity implements ILogger {
             finish();
         }
     }
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
