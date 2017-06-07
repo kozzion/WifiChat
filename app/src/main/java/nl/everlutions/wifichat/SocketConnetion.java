@@ -57,8 +57,6 @@ public class SocketConnetion {
             throw new RuntimeException("Stream wrap failed");
         }
 
-        //this.mAddress = socket.getInetAddress();
-        //this.mPort = socket.getPort();
         mWriteQueue = new ArrayBlockingQueue<>(QUEUE_CAPACITY);
         mWriteThread = new Thread(new WriteRunnable());
         mWriteThread.start();

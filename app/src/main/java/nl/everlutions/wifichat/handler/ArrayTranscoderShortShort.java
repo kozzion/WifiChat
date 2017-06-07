@@ -1,6 +1,6 @@
 package nl.everlutions.wifichat.handler;
 
-import nl.everlutions.wifichat.handler.IMessageHandlerShortArray;
+import java.util.Queue;
 
 /**
  * Created by jaapo on 30-5-2017.
@@ -9,14 +9,14 @@ import nl.everlutions.wifichat.handler.IMessageHandlerShortArray;
 public class ArrayTranscoderShortShort
 {
     private short [] mCurrentArray;
-    private IMessageHandlerShortArray mHandler;
+    private  Queue<short[]> mTargetQueue;
     private int mOutputSize;
     private int mWriteIndex;
 
-    public ArrayTranscoderShortShort(int outputSize, IMessageHandlerShortArray handler)
+    public ArrayTranscoderShortShort(int outputSize, Queue<short[]> targetQueue)
     {
         mOutputSize = outputSize;
-        mHandler = handler;
+        mTargetQueue = targetQueue;
         mCurrentArray = new short[outputSize];
         mWriteIndex = 0;
     }
@@ -32,7 +32,7 @@ public class ArrayTranscoderShortShort
             if( mWriteIndex == mOutputSize)
             {
                 //Log.e("transCode", "queue all");
-                mHandler.handle(mCurrentArray);
+                mTargetQueue.offer(mCurrentArray);
                 mCurrentArray = new short[mOutputSize];
                 mWriteIndex = 0;
             }
@@ -43,7 +43,7 @@ public class ArrayTranscoderShortShort
 
                 if( mWriteIndex == mOutputSize)
                 {
-                    mHandler.handle(mCurrentArray);
+                    mTargetQueue.offer(mCurrentArray);
                     mCurrentArray = new short[mOutputSize];
                     mWriteIndex = 0;
                 }

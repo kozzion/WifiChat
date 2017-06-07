@@ -17,8 +17,6 @@ import java.util.Map;
 
 import nl.everlutions.wifichat.handler.IMessageHandlerByteArray;
 
-import static android.R.id.message;
-
 /**
  * Created by jaapo on 14-5-2017.
  */
@@ -32,13 +30,14 @@ public class CommunicationManagerNDS implements ICommunicationManager {
     public boolean mIsServerRunning;
     public boolean mIsDiscovering;
 
-    ServerSocket mServerSocket;
-    Thread mServerThread = null;
-    SocketConnetion mServerConnection = null;
-    Map<String, SocketConnetion> mClientConnectionMap = null;
+    public static final int MessageHandlerTypeAudio = 1;
+    public static final int MessageHandlerTypeChat = 2;
 
-
-    Map<Integer, Map<Integer, IMessageHandlerByteArray>> mHandlers;
+    private ServerSocket mServerSocket;
+    private Thread mServerThread;
+    private SocketConnetion mServerConnection;
+    private Map<String, SocketConnetion> mClientConnectionMap; //TODO use ids instead of strings a keys??
+    private Map<Integer, Map<Integer, IMessageHandlerByteArray>> mHandlerMap;
 
     // TODO: temp
     int mBytesReceveidSinceLastUpdate;
@@ -50,10 +49,23 @@ public class CommunicationManagerNDS implements ICommunicationManager {
         this.mHandler = handler;
         this.mNsdHelper = new NsdHelper(iLogger, context);
         this.mClientConnectionMap = new HashMap<>();
-        this.mHandlers = new HashMap<>();
+        this.mHandlerMap = new HashMap<>();
     }
 
+    public void addMessageHandler(int socketID, int messageType, IMessageHandlerByteArray messageHandler) {
+        if(!mHandlerMap.containsKey(socketID))
+        {
+            mHandlerMap.put(socketID, new HashMap<Integer, IMessageHandlerByteArray>());
+        }
 
+        if(!mHandlerMap.get(socketID).containsKey(messageType)) {
+            throw new RuntimeException("Duplicate handler");
+        }
+        else
+        {
+            mHandlerMap.get(socketID).put(messageType, messageHandler);
+        }
+    }
 
     public void addClientSocket(Socket socket) {
         mLogger.log("addClientSocket");
@@ -62,11 +74,10 @@ public class CommunicationManagerNDS implements ICommunicationManager {
             mLogger.log("Duplciate connetion: " + key);
         }
         mLogger.log("Connected: " + key);
-        mClientConnectionMap.put(key, new SocketConnetion(mLogger, socket, this));
+        mClientConnectionMap.put(key, new SocketConnetion(mLogger, socket, 0, this));
 
         //TODO add thread
-
-
+        //TODO add handlers?
     }
 
     public void floodSocket() {
@@ -88,8 +99,10 @@ public class CommunicationManagerNDS implements ICommunicationManager {
     }
 
     @Override
-    public void handle(int type, int source, byte[] byteMessage) {
-        mHandlers.get(type).get(source).handle(byteMessage);
+    public void handle(int socketID, int messageType, byte [] byteMessage) {
+        mHandlerMap.get(socketID).get(messageType).handle(byteMessage);
+
+        //TODO these just collect stats, make them better at that
 
         long currentTime = System.currentTimeMillis();
 
@@ -157,7 +170,7 @@ public class CommunicationManagerNDS implements ICommunicationManager {
                 NsdServiceInfo info = mNsdHelper.getServiceInfo(serviceKey);
                 try {
                     //TODO what if mServerConnection is not null
-                    mServerConnection = new SocketConnetion(mLogger, new Socket(info.getHost(), info.getPort()), CommunicationManagerNDS.this);
+                    mServerConnection = new SocketConnetion(mLogger, new Socket(info.getHost(), info.getPort()), 0, CommunicationManagerNDS.this);
                 } catch (IOException e) {
                     mLogger.log("IOE on connect to server" + e.getMessage());
                     e.printStackTrace();

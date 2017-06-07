@@ -9,11 +9,12 @@ import nl.everlutions.wifichat.AudioSampleManager;
  * Created by jaapo on 6-6-2017.
  */
 
-public class MessageHandlerAudio implements IMessageHandlerByteArray {
+public class MessageHandlerAudioPlay implements IMessageHandlerByteArray {
+
 
     AudioSampleManager mAudioSampleManager;
 
-    public MessageHandlerAudio(AudioSampleManager audioSampleManager)
+    public MessageHandlerAudioPlay(AudioSampleManager audioSampleManager)
     {
         mAudioSampleManager = audioSampleManager;
     }

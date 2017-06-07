@@ -20,6 +20,8 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import nl.everlutions.wifichat.handler.MessageHandlerAudioPlay;
+import nl.everlutions.wifichat.handler.MessageHandlerChat;
 
 public class MainActivity extends AppCompatActivity implements ILogger {
 
@@ -88,6 +90,9 @@ public class MainActivity extends AppCompatActivity implements ILogger {
         };
 
         mCommunicationManagerNDS = new CommunicationManagerNDS(this, mUpdateHandler, this);
+        mCommunicationManagerNDS.addMessageHandler(0, CommunicationManagerNDS.MessageHandlerTypeAudio, new MessageHandlerAudioPlay(mAudioSampleManager));
+        mCommunicationManagerNDS.addMessageHandler(0, CommunicationManagerNDS.MessageHandlerTypeChat, new MessageHandlerChat(this));
+
     }
 
     @OnClick(R.id.btn_flood)

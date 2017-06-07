@@ -1,14 +1,18 @@
 package nl.everlutions.wifichat.handler;
 
+import nl.everlutions.wifichat.MainActivity;
+
 /**
  * Created by jaapo on 6-6-2017.
  */
 
 public class MessageHandlerChat implements IMessageHandlerByteArray
 {
-    public void MessageHandlerChat()
-    {
+    MainActivity mMainActivity;
 
+    public MessageHandlerChat(MainActivity mainActivity)
+    {
+        mMainActivity = mainActivity;
     }
 
     @Override
