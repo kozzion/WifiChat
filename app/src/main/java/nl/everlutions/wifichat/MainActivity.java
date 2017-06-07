@@ -21,6 +21,8 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import nl.everlutions.wifichat.handler.MessageHandlerAudioPlay;
+import nl.everlutions.wifichat.handler.MessageHandlerChat;
 
 public class MainActivity extends AppCompatActivity implements ILogger {
 
@@ -51,6 +53,7 @@ public class MainActivity extends AppCompatActivity implements ILogger {
 
     public AudioSampleManager mAudioSampleManager;
     public CommunicationManagerNDS mCommunicationManagerNDS;
+
     // Requesting permission to RECORD_AUDIO
     private boolean permissionToRecordAccepted = false;
     private String[] permissions = {Manifest.permission.RECORD_AUDIO};
@@ -67,7 +70,6 @@ public class MainActivity extends AppCompatActivity implements ILogger {
             finish();
         }
     }
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,6 +90,9 @@ public class MainActivity extends AppCompatActivity implements ILogger {
         };
 
         mCommunicationManagerNDS = new CommunicationManagerNDS(this, mUpdateHandler, this);
+        mCommunicationManagerNDS.addMessageHandler(0, CommunicationManagerNDS.MessageHandlerTypeAudio, new MessageHandlerAudioPlay(mAudioSampleManager));
+        mCommunicationManagerNDS.addMessageHandler(0, CommunicationManagerNDS.MessageHandlerTypeChat, new MessageHandlerChat(this));
+
     }
 
     @OnClick(R.id.new_design_btn)

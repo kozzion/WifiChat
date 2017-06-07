@@ -11,13 +11,15 @@ import android.util.Log;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+import nl.everlutions.wifichat.handler.ArrayTranscoderShortShort;
+import nl.everlutions.wifichat.handler.IMessageHandlerShortArray;
+
 /**
  * Created by jaapo on 26-5-2017.
  */
 
-public class AudioSampleManager implements IMessageHandler
+public class AudioSampleManager
 {
-
     private static final int SAMPLE_RATE = 44100;
     private static final int QUEUE_CAPACITY = 1000;
 
@@ -30,15 +32,15 @@ public class AudioSampleManager implements IMessageHandler
     public int mBufferSizeRecord;
 
     public ArrayTranscoderShortShort mTranscoderPlay;
-    public ArrayTranscoderByteShort mTranscoderPlayBytes;
+
+    public ILogger mLogger;
+
+    public IMessageHandlerShortArray handlerRecord;
 
 
-    public MainActivity mMainActivity;
-
-
-    public AudioSampleManager(MainActivity mainActivity)
+    public AudioSampleManager(ILogger logger)
     {
-        mMainActivity = mainActivity;
+        mLogger = logger;
         mIsPlaying = false;
         mIsRecording = false;
         mPlayQueue = new ArrayBlockingQueue<>(QUEUE_CAPACITY);
@@ -54,8 +56,8 @@ public class AudioSampleManager implements IMessageHandler
             mBufferSizePlay = SAMPLE_RATE * 2;
         }
 
-        mTranscoderPlay = new ArrayTranscoderShortShort(mBufferSizePlay, this);
-        mTranscoderPlayBytes = new ArrayTranscoderByteShort(mBufferSizePlay, mTranscoderPlay);
+        mTranscoderPlay = new ArrayTranscoderShortShort(mBufferSizePlay, mPlayQueue);
+        handlerRecord = null;
     }
 
 
@@ -87,17 +89,15 @@ public class AudioSampleManager implements IMessageHandler
                         return;
                     }
 
-
                     Log.e("AudioSampleManager", "Start recording");
                     Log.e("AudioSampleManager", "Buffers: " + mBufferSizePlay + " " + mBufferSizeRecord);
                     record.startRecording();
                     while (mIsRecording) {
 
                         int toWriteCount = record.read(audioRecordBuffer, 0, audioRecordBuffer.length);
-                        //mTranscoderPlay.transCode(audioRecordBuffer, toWriteCount);
-
-                        mMainActivity.mCommunicationManagerNDS.queueRecording(audioRecordBuffer, toWriteCount);
-
+                        short[] audioArray = new short [toWriteCount];
+                        System.arraycopy(audioRecordBuffer, 0, audioArray,0, toWriteCount);
+                        handlerRecord.handle(audioArray);
                     }
                     record.stop();
                     record.release();
@@ -135,6 +135,10 @@ public class AudioSampleManager implements IMessageHandler
                     {
                         try {
                             short []  buffer = mPlayQueue.take();
+                            if (mBufferSizePlay != buffer.length)
+                            {
+                                throw new RuntimeException("is: "  + buffer.length + " should be "  + mBufferSizePlay);
+                            }
                             playTrack.write(buffer, 0, buffer.length);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
@@ -152,24 +156,7 @@ public class AudioSampleManager implements IMessageHandler
         }
     }
 
-    @Override
-    public void handleMessage(short[] samples) {
-        if (mBufferSizePlay != samples.length)
-        {
-            throw new RuntimeException("is: "  + samples.length + " should be "  + mBufferSizePlay);
-        }
-        else
-        {
-            mPlayQueue.offer(samples);
-            Log.e("Blieb","mPlayQueue " + mPlayQueue.size());
-            Log.e("Blieb","mPlayQueue " + samples.length);
-        }
-    }
 
-    @Override
-    public void handleMessage(byte[] messageBytes) {
-
-    }
 
     public void onStop() {
         playAudioStop();

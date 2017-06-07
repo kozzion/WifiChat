@@ -1,7 +1,4 @@
-package nl.everlutions.wifichat;
-
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
+package nl.everlutions.wifichat.handler;
 
 /**
  * Created by jaapo on 30-5-2017.
@@ -24,10 +21,7 @@ public class ArrayTranscoderByteShort
 
     public void transCode(byte [] input, int toWriteCount)
     {
-        short[] shorts = new short[input.length / 2];
-        // to turn bytes to shorts as either big endian or little endian.
-        ByteBuffer.wrap(input).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().get(shorts);
-        mHandler.transCode(shorts, shorts.length);
+
     }
 
 
