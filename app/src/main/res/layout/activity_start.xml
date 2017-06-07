@@ -2,6 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
+                android:background="@color/base_white_off"
                 android:orientation="vertical"
                 android:padding="20dp">
 
@@ -38,31 +39,29 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/start_divider_liner"
+        android:layout_marginBottom="20dp"
         android:layout_marginTop="20dp"
-        android:text="JOIN"
+        android:text="Available hosts to JOIN"
         android:textColor="@android:color/black"
         android:textSize="18sp"/>
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/start_join_title">
+        android:layout_below="@+id/start_join_title"
+        >
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/start_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
 
         <ProgressBar
-            android:id="@+id/address_search_loader"
+            android:id="@+id/start_loader"
             style="?android:attr/progressBarStyleSmall"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_centerInParent="true"
             android:visibility="visible"/>
     </RelativeLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@+id/start_join_title">
-
-    </LinearLayout>
-
-
 </RelativeLayout>

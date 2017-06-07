@@ -3,55 +3,92 @@ package nl.everlutions.wifichat;
 import android.content.Context;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
-import android.os.Handler;
 import android.util.Log;
 
 import static nl.everlutions.wifichat.IConstants.NSD_SERVICE_TYPE;
+import static nl.everlutions.wifichat.NsdHelper.SERVICE_TYPE;
 
-public class NSDDiscoveryManager implements NsdManager.DiscoveryListener {
+public class NSDDiscoveryManager implements NsdManager.DiscoveryListener, NsdManager.ResolveListener {
+
+    final String TAG = this.getClass().getSimpleName();
 
     private final NsdManager mNsdManager;
+    private final Listener mListener;
 
-    public NSDDiscoveryManager(ILogger iLogger, Handler handler, Context context) {
+    public NSDDiscoveryManager(Context context, Listener listener) {
         mNsdManager = (NsdManager) context.getSystemService(Context.NSD_SERVICE);
+        mListener = listener;
     }
 
     public void shouldStartDiscovery() {
         mNsdManager.discoverServices(NSD_SERVICE_TYPE, NsdManager.PROTOCOL_DNS_SD, this);
     }
 
+    public void shouldStopDiscovery() {
+        mNsdManager.stopServiceDiscovery(this);
+    }
 
     @Override
     public void onStartDiscoveryFailed(String s, int i) {
-        Log.e("TAG", "onStartDiscoveryFailed: " + s);
+        Log.e(TAG, "onStartDiscoveryFailed: " + s);
     }
 
     @Override
     public void onStopDiscoveryFailed(String s, int i) {
-        Log.e("TAG", "onStopDiscoveryFailed: " + s);
+        Log.e(TAG, "onStopDiscoveryFailed: " + s);
     }
 
     @Override
     public void onDiscoveryStarted(String s) {
-        Log.e("TAG", "onDiscoveryStarted: " + s);
+        Log.e(TAG, "onDiscoveryStarted: " + s);
     }
 
     @Override
     public void onDiscoveryStopped(String s) {
-        Log.e("TAG", "onDiscoveryStopped: " + s);
+        Log.e(TAG, "onDiscoveryStopped: " + s);
     }
 
     @Override
     public void onServiceFound(NsdServiceInfo nsdServiceInfo) {
-        Log.e("TAG", "onServiceFound: " + nsdServiceInfo.toString());
+        if (nsdServiceInfo != null) {
+            Log.e(TAG, "onServiceFound: " + nsdServiceInfo.toString());
+            if (!nsdServiceInfo.getServiceType().equals(SERVICE_TYPE)) {
+                Log.e(TAG, "unknown Service Type: " + nsdServiceInfo.getServiceType());
+            } else {
+                Log.e(TAG, "resolvingService()");
+                mNsdManager.resolveService(nsdServiceInfo, new NsdManager.ResolveListener() {
+                    @Override
+                    public void onResolveFailed(NsdServiceInfo nsdServiceInfo, int i) {
+                        Log.e(TAG, "onResolveFailed: " + nsdServiceInfo.toString());
+                    }
+
+                    @Override
+                    public void onServiceResolved(NsdServiceInfo nsdServiceInfo) {
+                        Log.e(TAG, "onServiceResolved: " + nsdServiceInfo.toString());
+                        mListener.updateHostItems(nsdServiceInfo);
+                    }
+                });
+            }
+        }
     }
 
     @Override
     public void onServiceLost(NsdServiceInfo nsdServiceInfo) {
-        Log.e("TAG", "onServiceLost: " + nsdServiceInfo.toString());
+        Log.e(TAG, "onServiceLost: " + nsdServiceInfo.toString());
     }
 
-    public interface Listener {
+    @Override
+    public void onResolveFailed(NsdServiceInfo nsdServiceInfo, int i) {
+        Log.e(TAG, "onResolveFailed: " + nsdServiceInfo.toString());
+    }
 
+    @Override
+    public void onServiceResolved(NsdServiceInfo nsdServiceInfo) {
+        Log.e(TAG, "onServiceResolved: " + nsdServiceInfo.toString());
+    }
+
+
+    public interface Listener {
+        void updateHostItems(NsdServiceInfo hostItem);
     }
 }
