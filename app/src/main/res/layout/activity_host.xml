@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    >
+
+    <TextView
+        android:id="@+id/host_remote_queue"
+        style="@style/host_screen_labels"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Remote queue:"/>
+
+    <TextView
+        android:id="@+id/host_local_queue"
+        style="@style/host_screen_labels"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Local queue:"/>
+
+
+</LinearLayout>

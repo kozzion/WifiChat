@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+
+    <Button
+        android:id="@+id/btn_host"
+        android:layout_width="wrap_content"
+        android:layout_height="60dp"
+        android:text="HOST"
+        android:textSize="16sp"
+        android:textStyle="bold"/>
+
+
+    <EditText
+        android:id="@+id/chatInput"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_toRightOf="@+id/btn_host"
+        android:hint="Custom host name..."
+        android:inputType="text"
+        android:maxLines="1"
+        android:paddingLeft="20dp"/>
+
+    <View
+        android:id="@+id/start_divider_liner"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@+id/chatInput"
+        android:layout_marginTop="20dp"
+        android:background="@android:color/black"/>
+
+    <TextView
+        android:id="@+id/start_join_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/start_divider_liner"
+        android:layout_marginTop="20dp"
+        android:text="JOIN"
+        android:textColor="@android:color/black"
+        android:textSize="18sp"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/start_join_title">
+
+        <ProgressBar
+            android:id="@+id/address_search_loader"
+            style="?android:attr/progressBarStyleSmall"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_centerInParent="true"
+            android:visibility="visible"/>
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/start_join_title">
+
+    </LinearLayout>
+
+
+</RelativeLayout>

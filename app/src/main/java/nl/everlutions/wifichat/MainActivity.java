@@ -1,6 +1,7 @@
 package nl.everlutions.wifichat;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -44,7 +45,6 @@ public class MainActivity extends AppCompatActivity implements ILogger {
     @BindView(R.id.scrollview)
     ScrollView mScrollView;
 
-
     private Handler mUpdateHandler;
 
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
@@ -69,7 +69,6 @@ public class MainActivity extends AppCompatActivity implements ILogger {
     }
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -91,8 +90,13 @@ public class MainActivity extends AppCompatActivity implements ILogger {
         mCommunicationManagerNDS = new CommunicationManagerNDS(this, mUpdateHandler, this);
     }
 
+    @OnClick(R.id.new_design_btn)
+    public void clickNewDesign() {
+        startActivity(new Intent(this, StartActivity.class));
+    }
+
     @OnClick(R.id.btn_flood)
-    public void clickFlood(){
+    public void clickFlood() {
         mCommunicationManagerNDS.floodSocket();
     }
 
@@ -144,6 +148,7 @@ public class MainActivity extends AppCompatActivity implements ILogger {
             mButtonPlay.setText("Start playing");
         }
     }
+
     @OnClick(R.id.btn_record)
     public void clickRecord(View v) {
         log(String.format("Click: " + mAudioSampleManager.mIsRecording));

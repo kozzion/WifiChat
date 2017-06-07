@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:orientation="vertical">
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:orientation="vertical">
 
     <LinearLayout
         android:id="@+id/button_holder"
@@ -16,11 +16,25 @@
             android:orientation="horizontal">
 
             <Button
+                android:id="@+id/new_design_btn"
+                android:layout_width="0dp"
+                android:layout_height="64dp"
+                android:layout_weight="0.33"
+                android:text="Go to new design"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
                 android:id="@+id/host_btn"
                 android:layout_width="0dp"
                 android:layout_height="64dp"
                 android:layout_weight="0.33"
-                android:text="Host" />
+                android:text="Host"/>
 
             <Button
                 android:id="@+id/discover_btn"
@@ -28,14 +42,14 @@
                 android:layout_height="64dp"
                 android:layout_weight="0.33"
 
-                android:text="Discover" />
+                android:text="Discover"/>
 
             <Button
                 android:id="@+id/connect_btn"
                 android:layout_width="0dp"
                 android:layout_height="64dp"
                 android:layout_weight="0.33"
-                android:text="Connect" />
+                android:text="Connect"/>
         </LinearLayout>
 
         <LinearLayout
@@ -48,7 +62,7 @@
                 android:layout_width="0dp"
                 android:layout_height="64dp"
                 android:layout_weight="0.33"
-                android:text="Flood" />
+                android:text="Flood"/>
 
             <Button
                 android:id="@+id/btn_record"
@@ -56,14 +70,14 @@
                 android:layout_height="64dp"
                 android:layout_weight="0.33"
 
-                android:text="Record" />
+                android:text="Record"/>
 
             <Button
                 android:id="@+id/btn_play"
                 android:layout_width="0dp"
                 android:layout_height="64dp"
                 android:layout_weight="0.33"
-                android:text="Play" />
+                android:text="Play"/>
         </LinearLayout>
     </LinearLayout>
 
@@ -78,7 +92,7 @@
         <TextView
             android:id="@+id/status"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"/>
     </ScrollView>
 
     <EditText
@@ -92,7 +106,7 @@
         android:hint="type your message here..."
         android:inputType="text"
         android:maxLines="1"
-        android:padding="4dp" />
+        android:padding="4dp"/>
 
     <Button
         android:id="@+id/send_btn"
@@ -100,7 +114,7 @@
         android:layout_height="64dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
-        android:text="send" />
+        android:text="send"/>
 
 
 </RelativeLayout>
