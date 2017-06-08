@@ -1,4 +1,4 @@
-package nl.everlutions.wifichat;
+package nl.everlutions.wifichat.services;
 
 import android.content.Context;
 import android.net.nsd.NsdManager;
@@ -6,7 +6,6 @@ import android.net.nsd.NsdServiceInfo;
 import android.util.Log;
 
 import static nl.everlutions.wifichat.IConstants.NSD_SERVICE_TYPE;
-import static nl.everlutions.wifichat.NsdHelper.SERVICE_TYPE;
 
 public class NSDDiscoveryManager implements NsdManager.DiscoveryListener, NsdManager.ResolveListener {
 
@@ -52,7 +51,7 @@ public class NSDDiscoveryManager implements NsdManager.DiscoveryListener, NsdMan
     public void onServiceFound(NsdServiceInfo nsdServiceInfo) {
         if (nsdServiceInfo != null) {
             Log.e(TAG, "onServiceFound: " + nsdServiceInfo.toString());
-            if (!nsdServiceInfo.getServiceType().equals(SERVICE_TYPE)) {
+            if (!nsdServiceInfo.getServiceType().equals(NsdHelper.SERVICE_TYPE)) {
                 Log.e(TAG, "unknown Service Type: " + nsdServiceInfo.getServiceType());
             } else {
                 Log.e(TAG, "resolvingService()");

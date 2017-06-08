@@ -1,4 +1,4 @@
-package nl.everlutions.wifichat;
+package nl.everlutions.wifichat.services;
 
 import static android.R.attr.offset;
 

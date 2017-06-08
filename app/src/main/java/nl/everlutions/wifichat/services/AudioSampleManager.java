@@ -1,4 +1,4 @@
-package nl.everlutions.wifichat;
+package nl.everlutions.wifichat.services;
 
 import android.media.AudioFormat;
 import android.media.AudioManager;
@@ -11,6 +11,7 @@ import android.util.Log;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+import nl.everlutions.wifichat.ILogger;
 import nl.everlutions.wifichat.handler.ArrayTranscoderShortShort;
 import nl.everlutions.wifichat.handler.IMessageHandlerShortArray;
 
@@ -61,12 +62,12 @@ public class AudioSampleManager
     }
 
 
-    void recordAudioStop() {
+    public void recordAudioStop() {
         mIsRecording = false;
     }
 
 
-    void recordAudioStart()
+    public void recordAudioStart()
     {
         if (!mIsRecording)
         {
@@ -106,7 +107,7 @@ public class AudioSampleManager
         }
     }
 
-    void playAudioStop() {
+    public void playAudioStop() {
         mIsPlaying = false;
     }
 

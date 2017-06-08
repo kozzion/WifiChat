@@ -1,4 +1,4 @@
-package nl.everlutions.wifichat;
+package nl.everlutions.wifichat.services;
 
 /**
  * Created by jaapo on 6-6-2017.

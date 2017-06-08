@@ -1,4 +1,4 @@
-package nl.everlutions.wifichat;
+package nl.everlutions.wifichat.services;
 
 import android.content.Context;
 import android.net.nsd.NsdServiceInfo;
@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import nl.everlutions.wifichat.ILogger;
 import nl.everlutions.wifichat.handler.IMessageHandlerByteArray;
 
 /**
@@ -53,16 +54,13 @@ public class CommunicationManagerNDS implements ICommunicationManager {
     }
 
     public void addMessageHandler(int socketID, int messageType, IMessageHandlerByteArray messageHandler) {
-        if(!mHandlerMap.containsKey(socketID))
-        {
+        if (!mHandlerMap.containsKey(socketID)) {
             mHandlerMap.put(socketID, new HashMap<Integer, IMessageHandlerByteArray>());
         }
 
-        if(!mHandlerMap.get(socketID).containsKey(messageType)) {
+        if (!mHandlerMap.get(socketID).containsKey(messageType)) {
             throw new RuntimeException("Duplicate handler");
-        }
-        else
-        {
+        } else {
             mHandlerMap.get(socketID).put(messageType, messageHandler);
         }
     }
@@ -99,7 +97,7 @@ public class CommunicationManagerNDS implements ICommunicationManager {
     }
 
     @Override
-    public void handle(int socketID, int messageType, byte [] byteMessage) {
+    public void handle(int socketID, int messageType, byte[] byteMessage) {
         mHandlerMap.get(socketID).get(messageType).handle(byteMessage);
 
         //TODO these just collect stats, make them better at that
@@ -123,6 +121,16 @@ public class CommunicationManagerNDS implements ICommunicationManager {
         }
         //mTimeOfLastMessage = System.currentTimeMillis();
 
+    }
+
+    @Override
+    public void handleSendToServer(int messageType, byte[] byteMessage) {
+        //TODO handle send to Server message
+    }
+
+    @Override
+    public void handleSendToClients(int messageType, byte[] byteMessage) {
+        //TODO handle send to Clients message
     }
 
 

@@ -1,4 +1,4 @@
-package nl.everlutions.wifichat;
+package nl.everlutions.wifichat.activities;
 
 import android.Manifest;
 import android.content.Intent;
@@ -21,8 +21,10 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import nl.everlutions.wifichat.handler.MessageHandlerAudioPlay;
-import nl.everlutions.wifichat.handler.MessageHandlerChat;
+import nl.everlutions.wifichat.ILogger;
+import nl.everlutions.wifichat.R;
+import nl.everlutions.wifichat.services.AudioSampleManager;
+import nl.everlutions.wifichat.services.CommunicationManagerNDS;
 
 public class MainActivity extends AppCompatActivity implements ILogger {
 
@@ -90,8 +92,9 @@ public class MainActivity extends AppCompatActivity implements ILogger {
         };
 
         mCommunicationManagerNDS = new CommunicationManagerNDS(this, mUpdateHandler, this);
-        mCommunicationManagerNDS.addMessageHandler(0, CommunicationManagerNDS.MessageHandlerTypeAudio, new MessageHandlerAudioPlay(mAudioSampleManager));
-        mCommunicationManagerNDS.addMessageHandler(0, CommunicationManagerNDS.MessageHandlerTypeChat, new MessageHandlerChat(this));
+        //TODO crash duplicate handler error on line 64 CommunicationManagerNDS
+//        mCommunicationManagerNDS.addMessageHandler(0, CommunicationManagerNDS.MessageHandlerTypeAudio, new MessageHandlerAudioPlay(mAudioSampleManager));
+//        mCommunicationManagerNDS.addMessageHandler(0, CommunicationManagerNDS.MessageHandlerTypeChat, new MessageHandlerChat(this));
 
     }
 

@@ -1,4 +1,4 @@
-package nl.everlutions.wifichat;
+package nl.everlutions.wifichat.activities;
 
 
 import android.content.Intent;
@@ -15,6 +15,9 @@ import android.widget.Toast;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import nl.everlutions.wifichat.adapters.HostRecyclerListAdapter;
+import nl.everlutions.wifichat.services.NSDDiscoveryManager;
+import nl.everlutions.wifichat.R;
 import nl.everlutions.wifichat.utils.ScreenUtils;
 
 public class StartActivity extends AppCompatActivity implements NSDDiscoveryManager.Listener {

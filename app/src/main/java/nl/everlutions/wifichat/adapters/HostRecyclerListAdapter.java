@@ -1,4 +1,4 @@
-package nl.everlutions.wifichat;
+package nl.everlutions.wifichat.adapters;
 
 
 import android.content.Context;
@@ -10,6 +10,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+
+import nl.everlutions.wifichat.R;
 
 
 public class HostRecyclerListAdapter extends RecyclerView.Adapter<HostRecyclerListAdapter.ViewHolder> {

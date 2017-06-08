@@ -1,4 +1,4 @@
-package nl.everlutions.wifichat;
+package nl.everlutions.wifichat.adapters;
 
 
 import android.content.Context;
@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import nl.everlutions.wifichat.R;
 
 
 public class BasicRecyclerListAdapter extends RecyclerView.Adapter<BasicRecyclerListAdapter.ViewHolder> {

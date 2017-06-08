@@ -1,4 +1,4 @@
-package nl.everlutions.wifichat;
+package nl.everlutions.wifichat.services;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -8,6 +8,8 @@ import java.net.UnknownHostException;
 import java.util.Random;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+
+import nl.everlutions.wifichat.ILogger;
 
 /**
  * Created by jaapo on 8-5-2017.

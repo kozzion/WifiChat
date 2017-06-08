@@ -16,7 +16,7 @@
         android:theme="@style/AppTheme">
 
         <activity
-            android:name=".MainActivity"
+            android:name=".activities.MainActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -25,10 +25,10 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".StartActivity"
+            android:name=".activities.StartActivity"
             android:screenOrientation="portrait"></activity>
         <activity
-            android:name=".HostActivity"
+            android:name=".activities.HostActivity"
             android:screenOrientation="portrait"></activity>
     </application>
 

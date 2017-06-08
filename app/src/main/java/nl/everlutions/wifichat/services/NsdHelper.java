@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nl.everlutions.wifichat;
+package nl.everlutions.wifichat.services;
 
 import android.content.Context;
 import android.net.nsd.NsdManager;
@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import nl.everlutions.wifichat.ILogger;
 
 public class NsdHelper {
 

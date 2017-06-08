@@ -3,7 +3,7 @@ package nl.everlutions.wifichat.handler;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import nl.everlutions.wifichat.AudioSampleManager;
+import nl.everlutions.wifichat.services.AudioSampleManager;
 
 /**
  * Created by jaapo on 6-6-2017.
