@@ -3,7 +3,6 @@ package nl.everlutions.wifichat.services;
 import android.content.Context;
 import android.net.nsd.NsdServiceInfo;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
@@ -23,7 +22,6 @@ import nl.everlutions.wifichat.handler.IMessageHandlerByteArray;
  */
 
 public class ServiceNSDCommunication implements ICommunicationManager {
-    private final Handler mHandler;
     private final ServiceNSDRegister mNsdHelper;
 
 
@@ -46,8 +44,7 @@ public class ServiceNSDCommunication implements ICommunicationManager {
 
     private final String TAG = this.getClass().getSimpleName();
 
-    public ServiceNSDCommunication(Handler handler, Context context) {
-        this.mHandler = handler;
+    public ServiceNSDCommunication(Context context) {
         this.mNsdHelper = new ServiceNSDRegister(context);
         this.mClientConnectionMap = new HashMap<>();
         this.mHandlerMap = new HashMap<>();
@@ -98,7 +95,6 @@ public class ServiceNSDCommunication implements ICommunicationManager {
 
             Message message = new Message();
             message.setData(messageBundle);
-            mHandler.sendMessage(message);
             mTimeOfLastUodate = currentTime;
             mBytesReceveidSinceLastUpdate = 0;
         }
@@ -117,7 +113,7 @@ public class ServiceNSDCommunication implements ICommunicationManager {
     }
 
 
-    public void startServer() {
+    public void startServer(String serviceName) {
         //TODO
         Log.e(TAG, "Server started");
 
@@ -131,7 +127,7 @@ public class ServiceNSDCommunication implements ICommunicationManager {
             mServerThread = new Thread(new ServerRunnable());
             mServerThread.start();
 
-            mNsdHelper.registerService(mServerSocket.getLocalPort(), "NDSCHAT");
+            mNsdHelper.registerService(mServerSocket.getLocalPort(), serviceName);
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -30,6 +30,9 @@
         <activity
             android:name=".activities.HostActivity"
             android:screenOrientation="portrait"></activity>
+        <activity
+            android:name=".activities.JoinActivity"
+            android:screenOrientation="portrait"></activity>
     </application>
 
 </manifest>

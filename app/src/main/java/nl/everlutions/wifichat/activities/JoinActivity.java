@@ -11,7 +11,7 @@ import nl.everlutions.wifichat.services.ServiceNSDCommunication;
 import static nl.everlutions.wifichat.IConstants.IKEY_NSD_SERVICE_NAME;
 import static nl.everlutions.wifichat.IConstants.NSD_DEFAULT_HOST_NAME;
 
-public class HostActivity extends AppCompatActivity {
+public class JoinActivity extends AppCompatActivity {
 
     private ServiceNSDCommunication mServiceNSDCommunication;
 
@@ -19,13 +19,15 @@ public class HostActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_host);
-        String hostName = getIntent().getStringExtra(IKEY_NSD_SERVICE_NAME);
+        setTitle("JOINED");
 
-        if (hostName.isEmpty()) {
-            hostName = NSD_DEFAULT_HOST_NAME;
+        String nsdServiceName = getIntent().getStringExtra(IKEY_NSD_SERVICE_NAME);
+
+        if (nsdServiceName.isEmpty()) {
+            nsdServiceName = NSD_DEFAULT_HOST_NAME;
         }
 
         mServiceNSDCommunication = new ServiceNSDCommunication(this);
-        mServiceNSDCommunication.startServer(hostName);
+        mServiceNSDCommunication.connectToService(nsdServiceName);
     }
 }

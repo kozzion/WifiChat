@@ -91,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-        mServiceNSDCommunication = new ServiceNSDCommunication(mUpdateHandler, this);
+        mServiceNSDCommunication = new ServiceNSDCommunication(this);
         //TODO crash duplicate handler error on line 64 ServiceNSDCommunication
 //        mServiceNSDCommunication.addMessageHandler(0, ServiceNSDCommunication.MessageHandlerTypeAudio, new MessageHandlerAudioPlay(mServiceAudioSample));
 //        mServiceNSDCommunication.addMessageHandler(0, ServiceNSDCommunication.MessageHandlerTypeChat, new MessageHandlerChat(this));
@@ -112,7 +112,7 @@ public class MainActivity extends AppCompatActivity {
         // Register service
 
         if (!mServiceNSDCommunication.mIsServerRunning) {
-            mServiceNSDCommunication.startServer();
+            mServiceNSDCommunication.startServer("NSD OLD");
             mHostButton.setText("Unhost.");
         } else {
             mServiceNSDCommunication.stopServer();

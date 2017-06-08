@@ -57,6 +57,10 @@ public class HostRecyclerListAdapter extends RecyclerView.Adapter<HostRecyclerLi
         notifyDataSetChanged();
     }
 
+    public NsdServiceInfo getHostItem(int position) {
+        return mHostItems.get(position);
+    }
+
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
         //        @BindView(R.id.item_host_name)
