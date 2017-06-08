@@ -3,7 +3,7 @@ package nl.everlutions.wifichat.handler;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import nl.everlutions.wifichat.services.AudioSampleManager;
+import nl.everlutions.wifichat.services.ServiceAudioSample;
 
 /**
  * Created by jaapo on 6-6-2017.
@@ -12,11 +12,11 @@ import nl.everlutions.wifichat.services.AudioSampleManager;
 public class MessageHandlerAudioPlay implements IMessageHandlerByteArray {
 
 
-    AudioSampleManager mAudioSampleManager;
+    ServiceAudioSample mServiceAudioSample;
 
-    public MessageHandlerAudioPlay(AudioSampleManager audioSampleManager)
+    public MessageHandlerAudioPlay(ServiceAudioSample serviceAudioSample)
     {
-        mAudioSampleManager = audioSampleManager;
+        mServiceAudioSample = serviceAudioSample;
     }
 
     @Override
@@ -28,6 +28,6 @@ public class MessageHandlerAudioPlay implements IMessageHandlerByteArray {
         short[] shorts = new short[input.length / 2];
         // to turn bytes to shorts as either big endian or little endian.
         ByteBuffer.wrap(input).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().get(shorts);
-        mAudioSampleManager.mTranscoderPlay.transCode(shorts, shorts.length);
+        mServiceAudioSample.mTranscoderPlay.transCode(shorts, shorts.length);
     }
 }

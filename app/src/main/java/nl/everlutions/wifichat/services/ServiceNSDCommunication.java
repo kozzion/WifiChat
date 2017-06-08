@@ -5,6 +5,7 @@ import android.net.nsd.NsdServiceInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -15,17 +16,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import nl.everlutions.wifichat.ILogger;
 import nl.everlutions.wifichat.handler.IMessageHandlerByteArray;
 
 /**
  * Created by jaapo on 14-5-2017.
  */
 
-public class CommunicationManagerNDS implements ICommunicationManager {
-    private final ILogger mLogger;
+public class ServiceNSDCommunication implements ICommunicationManager {
     private final Handler mHandler;
-    private final NsdHelper mNsdHelper;
+    private final ServiceNSDRegister mNsdHelper;
 
 
     public boolean mIsServerRunning;
@@ -36,8 +35,8 @@ public class CommunicationManagerNDS implements ICommunicationManager {
 
     private ServerSocket mServerSocket;
     private Thread mServerThread;
-    private SocketConnetion mServerConnection;
-    private Map<String, SocketConnetion> mClientConnectionMap; //TODO use ids instead of strings a keys??
+    private SocketConnection mServerConnection;
+    private Map<String, SocketConnection> mClientConnectionMap; //TODO use ids instead of strings a keys??
     private Map<Integer, Map<Integer, IMessageHandlerByteArray>> mHandlerMap;
 
     // TODO: temp
@@ -45,10 +44,11 @@ public class CommunicationManagerNDS implements ICommunicationManager {
     long mTimeOfLastMessage;
     long mTimeOfLastUodate;
 
-    public CommunicationManagerNDS(ILogger iLogger, Handler handler, Context context) {
-        this.mLogger = iLogger;
+    private final String TAG = this.getClass().getSimpleName();
+
+    public ServiceNSDCommunication(Handler handler, Context context) {
         this.mHandler = handler;
-        this.mNsdHelper = new NsdHelper(iLogger, context);
+        this.mNsdHelper = new ServiceNSDRegister(context);
         this.mClientConnectionMap = new HashMap<>();
         this.mHandlerMap = new HashMap<>();
     }
@@ -66,35 +66,18 @@ public class CommunicationManagerNDS implements ICommunicationManager {
     }
 
     public void addClientSocket(Socket socket) {
-        mLogger.log("addClientSocket");
+        Log.e(TAG, "addClientSocket");
         String key = socket.getInetAddress().toString();
         if (mClientConnectionMap.containsKey(key)) {
-            mLogger.log("Duplciate connetion: " + key);
+            Log.e(TAG, "Duplciate connetion: " + key);
         }
-        mLogger.log("Connected: " + key);
-        mClientConnectionMap.put(key, new SocketConnetion(mLogger, socket, 0, this));
+        Log.e(TAG, "Connected: " + key);
+        mClientConnectionMap.put(key, new SocketConnection(socket, 0, this));
 
         //TODO add thread
         //TODO add handlers?
     }
 
-    public void floodSocket() {
-        //TODO temp
-        mLogger.log("floodSocket");
-        if (mServerConnection == null) {
-            mLogger.log("This is not a connected client");
-            throw new RuntimeException("This is not a connected client");
-        } else {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    while (true) {
-                        mServerConnection.queueRandom();
-                    }
-                }
-            }).start();
-        }
-    }
 
     @Override
     public void handle(int socketID, int messageType, byte[] byteMessage) {
@@ -136,7 +119,7 @@ public class CommunicationManagerNDS implements ICommunicationManager {
 
     public void startServer() {
         //TODO
-        mLogger.log("Server started");
+        Log.e(TAG, "Server started");
 
         //TODO check and handle if mServerSocket is not null
 
@@ -155,18 +138,18 @@ public class CommunicationManagerNDS implements ICommunicationManager {
     }
 
     public void stopServer() {
-        mLogger.log("Does nothing");
+        Log.e(TAG, "Does nothing");
     }
 
     public void startDiscovering() {
-        mLogger.log("startDiscovering");
+        Log.e(TAG, "startDiscovering");
         mNsdHelper.startDiscoverServices();
         mIsDiscovering = true;
 
     }
 
     public void stopDiscovering() {
-        mLogger.log("stopDiscovering");
+        Log.e(TAG, "stopDiscovering");
         mNsdHelper.stopDiscoverServices();
         mIsDiscovering = false;
     }
@@ -178,9 +161,9 @@ public class CommunicationManagerNDS implements ICommunicationManager {
                 NsdServiceInfo info = mNsdHelper.getServiceInfo(serviceKey);
                 try {
                     //TODO what if mServerConnection is not null
-                    mServerConnection = new SocketConnetion(mLogger, new Socket(info.getHost(), info.getPort()), 0, CommunicationManagerNDS.this);
+                    mServerConnection = new SocketConnection(new Socket(info.getHost(), info.getPort()), 0, ServiceNSDCommunication.this);
                 } catch (IOException e) {
-                    mLogger.log("IOE on connect to server" + e.getMessage());
+                    Log.e(TAG, "IOE on connect to server" + e.getMessage());
                     e.printStackTrace();
                 }
             }
@@ -190,12 +173,12 @@ public class CommunicationManagerNDS implements ICommunicationManager {
 
     public void sendMessage(String messageString) {
         if (mIsServerRunning) {
-            for (SocketConnetion client_connetion : mClientConnectionMap.values()) {
-                mLogger.log("sendMessage to client");
+            for (SocketConnection client_connetion : mClientConnectionMap.values()) {
+                Log.e(TAG, "sendMessage to client");
                 client_connetion.queueMessage(messageString.getBytes());
             }
         } else {
-            mLogger.log("sendMessage to server");
+            Log.e(TAG, "sendMessage to server");
             mServerConnection.queueMessage(messageString.getBytes());
         }
     }
@@ -213,9 +196,9 @@ public class CommunicationManagerNDS implements ICommunicationManager {
 
     public void queueRecording(final short[] audioRecordBuffer, final int toWriteCount) {
         //TODO temp
-        mLogger.log("queueRecording");
+        Log.e(TAG, "queueRecording");
         if (mServerConnection == null) {
-            mLogger.log("This is not a connected client");
+            Log.e(TAG, "This is not a connected client");
             throw new RuntimeException("This is not a connected client");
         } else {
 
@@ -233,11 +216,11 @@ public class CommunicationManagerNDS implements ICommunicationManager {
 
             try {
                 while (!Thread.currentThread().isInterrupted()) {
-                    mLogger.log("ServerSocket Created, awaiting connection");
+                    Log.e(TAG, "ServerSocket Created, awaiting connection");
                     addClientSocket(mServerSocket.accept());
                 }
             } catch (IOException e) {
-                mLogger.log("Error creating ServerSocket: " + e.getLocalizedMessage());
+                Log.e(TAG, "Error creating ServerSocket: " + e.getLocalizedMessage());
                 e.printStackTrace();
             }
         }

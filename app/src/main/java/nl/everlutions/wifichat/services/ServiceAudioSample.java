@@ -11,7 +11,6 @@ import android.util.Log;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-import nl.everlutions.wifichat.ILogger;
 import nl.everlutions.wifichat.handler.ArrayTranscoderShortShort;
 import nl.everlutions.wifichat.handler.IMessageHandlerShortArray;
 
@@ -19,7 +18,7 @@ import nl.everlutions.wifichat.handler.IMessageHandlerShortArray;
  * Created by jaapo on 26-5-2017.
  */
 
-public class AudioSampleManager
+public class ServiceAudioSample
 {
     private static final int SAMPLE_RATE = 44100;
     private static final int QUEUE_CAPACITY = 1000;
@@ -34,14 +33,12 @@ public class AudioSampleManager
 
     public ArrayTranscoderShortShort mTranscoderPlay;
 
-    public ILogger mLogger;
-
+    private final String TAG = this.getClass().getSimpleName();
     public IMessageHandlerShortArray handlerRecord;
 
 
-    public AudioSampleManager(ILogger logger)
+    public ServiceAudioSample()
     {
-        mLogger = logger;
         mIsPlaying = false;
         mIsRecording = false;
         mPlayQueue = new ArrayBlockingQueue<>(QUEUE_CAPACITY);
@@ -86,12 +83,12 @@ public class AudioSampleManager
                             mBufferSizeRecord);
 
                     if (record.getState() != AudioRecord.STATE_INITIALIZED) {
-                        Log.e("AudioSampleManager", "Audio Record can't initialize!");
+                        Log.e("ServiceAudioSample", "Audio Record can't initialize!");
                         return;
                     }
 
-                    Log.e("AudioSampleManager", "Start recording");
-                    Log.e("AudioSampleManager", "Buffers: " + mBufferSizePlay + " " + mBufferSizeRecord);
+                    Log.e("ServiceAudioSample", "Start recording");
+                    Log.e("ServiceAudioSample", "Buffers: " + mBufferSizePlay + " " + mBufferSizeRecord);
                     record.startRecording();
                     while (mIsRecording) {
 

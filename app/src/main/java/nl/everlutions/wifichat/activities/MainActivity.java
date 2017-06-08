@@ -21,13 +21,13 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import nl.everlutions.wifichat.ILogger;
 import nl.everlutions.wifichat.R;
-import nl.everlutions.wifichat.services.AudioSampleManager;
-import nl.everlutions.wifichat.services.CommunicationManagerNDS;
+import nl.everlutions.wifichat.services.ServiceAudioSample;
+import nl.everlutions.wifichat.services.ServiceNSDCommunication;
 
-public class MainActivity extends AppCompatActivity implements ILogger {
+public class MainActivity extends AppCompatActivity {
 
+    private final String TAG = this.getClass().getSimpleName();
 
     @BindView(R.id.status)
     TextView mStatusView;
@@ -53,8 +53,8 @@ public class MainActivity extends AppCompatActivity implements ILogger {
 
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
 
-    public AudioSampleManager mAudioSampleManager;
-    public CommunicationManagerNDS mCommunicationManagerNDS;
+    public ServiceAudioSample mServiceAudioSample;
+    public ServiceNSDCommunication mServiceNSDCommunication;
 
     // Requesting permission to RECORD_AUDIO
     private boolean permissionToRecordAccepted = false;
@@ -81,7 +81,7 @@ public class MainActivity extends AppCompatActivity implements ILogger {
 
         //New code
         ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
-        mAudioSampleManager = new AudioSampleManager(this);
+        mServiceAudioSample = new ServiceAudioSample();
 
         mUpdateHandler = new Handler() {
             @Override
@@ -91,10 +91,10 @@ public class MainActivity extends AppCompatActivity implements ILogger {
             }
         };
 
-        mCommunicationManagerNDS = new CommunicationManagerNDS(this, mUpdateHandler, this);
-        //TODO crash duplicate handler error on line 64 CommunicationManagerNDS
-//        mCommunicationManagerNDS.addMessageHandler(0, CommunicationManagerNDS.MessageHandlerTypeAudio, new MessageHandlerAudioPlay(mAudioSampleManager));
-//        mCommunicationManagerNDS.addMessageHandler(0, CommunicationManagerNDS.MessageHandlerTypeChat, new MessageHandlerChat(this));
+        mServiceNSDCommunication = new ServiceNSDCommunication(mUpdateHandler, this);
+        //TODO crash duplicate handler error on line 64 ServiceNSDCommunication
+//        mServiceNSDCommunication.addMessageHandler(0, ServiceNSDCommunication.MessageHandlerTypeAudio, new MessageHandlerAudioPlay(mServiceAudioSample));
+//        mServiceNSDCommunication.addMessageHandler(0, ServiceNSDCommunication.MessageHandlerTypeChat, new MessageHandlerChat(this));
 
     }
 
@@ -105,68 +105,67 @@ public class MainActivity extends AppCompatActivity implements ILogger {
 
     @OnClick(R.id.btn_flood)
     public void clickFlood() {
-        mCommunicationManagerNDS.floodSocket();
     }
 
     @OnClick(R.id.host_btn)
     public void clickHost(View v) {
         // Register service
 
-        if (!mCommunicationManagerNDS.mIsServerRunning) {
-            mCommunicationManagerNDS.startServer();
+        if (!mServiceNSDCommunication.mIsServerRunning) {
+            mServiceNSDCommunication.startServer();
             mHostButton.setText("Unhost.");
         } else {
-            mCommunicationManagerNDS.stopServer();
+            mServiceNSDCommunication.stopServer();
             mHostButton.setText("Hosting");
         }
     }
 
     @OnClick(R.id.discover_btn)
     public void clickDiscover(View v) {
-        log("clickDiscover ");
+        Log.e(TAG, "clickDiscover ");
 
-        if (!mCommunicationManagerNDS.mIsDiscovering) {
-            mCommunicationManagerNDS.startDiscovering();
-            log("Discovering...");
+        if (!mServiceNSDCommunication.mIsDiscovering) {
+            mServiceNSDCommunication.startDiscovering();
+            Log.e(TAG, "Discovering...");
             mDiscoverButton.setText("Dscvrng...");
         } else {
-            mCommunicationManagerNDS.stopDiscovering();
+            mServiceNSDCommunication.stopDiscovering();
             mDiscoverButton.setText("Discover");
-            log("StopDiscovering...");
+            Log.e(TAG, "StopDiscovering...");
         }
     }
 
     @OnClick(R.id.connect_btn)
     public void clickConnect(View v) {
-        List<String> serviceList = mCommunicationManagerNDS.getServiceKeyList();
-        mCommunicationManagerNDS.connectToService(serviceList.get(0));
+        List<String> serviceList = mServiceNSDCommunication.getServiceKeyList();
+        mServiceNSDCommunication.connectToService(serviceList.get(0));
 
     }
 
     @OnClick(R.id.btn_play)
     public void clickPlay(View v) {
-        log(String.format("Click: " + mAudioSampleManager.mIsPlaying));
-        if (mAudioSampleManager.mIsPlaying) {
-            log(String.format("Click: queuePlaySamples back"));
-            mAudioSampleManager.playAudioStop();
+        Log.e(TAG, String.format("Click: " + mServiceAudioSample.mIsPlaying));
+        if (mServiceAudioSample.mIsPlaying) {
+            Log.e(TAG, String.format("Click: queuePlaySamples back"));
+            mServiceAudioSample.playAudioStop();
             mButtonPlay.setText("Stop playing");
         } else {
-            log(String.format("Click: stop  start"));
-            mAudioSampleManager.playAudioStart();
+            Log.e(TAG, String.format("Click: stop  start"));
+            mServiceAudioSample.playAudioStart();
             mButtonPlay.setText("Start playing");
         }
     }
 
     @OnClick(R.id.btn_record)
     public void clickRecord(View v) {
-        log(String.format("Click: " + mAudioSampleManager.mIsRecording));
-        if (mAudioSampleManager.mIsRecording) {
-            log(String.format("Click: stop"));
-            mAudioSampleManager.recordAudioStop();
+        Log.e(TAG, String.format("Click: " + mServiceAudioSample.mIsRecording));
+        if (mServiceAudioSample.mIsRecording) {
+            Log.e(TAG, String.format("Click: stop"));
+            mServiceAudioSample.recordAudioStop();
             mButtonRecord.setText("Start recording");
         } else {
-            log(String.format("Click: start"));
-            mAudioSampleManager.recordAudioStart();
+            Log.e(TAG, String.format("Click: start"));
+            mServiceAudioSample.recordAudioStart();
             mButtonRecord.setText("Stop recording");
         }
     }
@@ -175,7 +174,7 @@ public class MainActivity extends AppCompatActivity implements ILogger {
     public void clickSend(View v) {
         final String messageString = mChatInputView.getText().toString();
         if (!messageString.isEmpty()) {
-            mCommunicationManagerNDS.sendMessage(messageString);
+            mServiceNSDCommunication.sendMessage(messageString);
             mChatInputView.setText("");
         }
     }
@@ -192,26 +191,15 @@ public class MainActivity extends AppCompatActivity implements ILogger {
 
     @Override
     protected void onPause() {
-        //mCommunicationManagerNDS.stopDiscovering(); TODO
+        //mServiceNSDCommunication.stopDiscovering(); TODO
         super.onPause();
     }
 
     @Override
     protected void onDestroy() {
-        //mCommunicationManagerNDS.onDestroy();
+        //mServiceNSDCommunication.onDestroy();
 
         super.onDestroy();
     }
 
-    @Override
-    public void log(final String s) {
-        Log.e("WifiChat", s);
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                addChatLine(s);
-            }
-        });
-
-    }
 }

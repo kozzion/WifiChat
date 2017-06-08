@@ -16,13 +16,13 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import nl.everlutions.wifichat.adapters.HostRecyclerListAdapter;
-import nl.everlutions.wifichat.services.NSDDiscoveryManager;
+import nl.everlutions.wifichat.services.ServiceNSDDiscovery;
 import nl.everlutions.wifichat.R;
 import nl.everlutions.wifichat.utils.ScreenUtils;
 
-public class StartActivity extends AppCompatActivity implements NSDDiscoveryManager.Listener {
+public class StartActivity extends AppCompatActivity implements ServiceNSDDiscovery.Listener {
 
-    private NSDDiscoveryManager mNsdDiscoveryManager;
+    private ServiceNSDDiscovery mNsdDiscoveryManager;
     private HostRecyclerListAdapter mHostListAdapter;
 
     @BindView(R.id.start_list)
@@ -37,7 +37,7 @@ public class StartActivity extends AppCompatActivity implements NSDDiscoveryMana
         ButterKnife.bind(this);
         ScreenUtils.hideKeyboardOnCreate(this);
 
-        mNsdDiscoveryManager = new NSDDiscoveryManager(this, this);
+        mNsdDiscoveryManager = new ServiceNSDDiscovery(this, this);
         mNsdDiscoveryManager.shouldStartDiscovery();
 
         mHostListAdapter = new HostRecyclerListAdapter(this, mOnHostItemClickListener);

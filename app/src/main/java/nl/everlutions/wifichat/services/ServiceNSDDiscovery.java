@@ -7,14 +7,14 @@ import android.util.Log;
 
 import static nl.everlutions.wifichat.IConstants.NSD_SERVICE_TYPE;
 
-public class NSDDiscoveryManager implements NsdManager.DiscoveryListener, NsdManager.ResolveListener {
+public class ServiceNSDDiscovery implements NsdManager.DiscoveryListener, NsdManager.ResolveListener {
 
-    final String TAG = this.getClass().getSimpleName();
+    private final String TAG = this.getClass().getSimpleName();
 
     private final NsdManager mNsdManager;
     private final Listener mListener;
 
-    public NSDDiscoveryManager(Context context, Listener listener) {
+    public ServiceNSDDiscovery(Context context, Listener listener) {
         mNsdManager = (NsdManager) context.getSystemService(Context.NSD_SERVICE);
         mListener = listener;
     }
@@ -51,7 +51,7 @@ public class NSDDiscoveryManager implements NsdManager.DiscoveryListener, NsdMan
     public void onServiceFound(NsdServiceInfo nsdServiceInfo) {
         if (nsdServiceInfo != null) {
             Log.e(TAG, "onServiceFound: " + nsdServiceInfo.toString());
-            if (!nsdServiceInfo.getServiceType().equals(NsdHelper.SERVICE_TYPE)) {
+            if (!nsdServiceInfo.getServiceType().equals(ServiceNSDRegister.SERVICE_TYPE)) {
                 Log.e(TAG, "unknown Service Type: " + nsdServiceInfo.getServiceType());
             } else {
                 Log.e(TAG, "resolvingService()");

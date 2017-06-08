@@ -1,35 +1,32 @@
 package nl.everlutions.wifichat.services;
 
+import android.util.Log;
+
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.Random;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-
-import nl.everlutions.wifichat.ILogger;
 
 /**
  * Created by jaapo on 8-5-2017.
  */
 
-public class SocketConnetion {
+public class SocketConnection {
 
 
     private static final int BUFFER_SIZE = 4096;
 
-    private final ILogger mILogger;
     private final Socket mSocket;
     private final int mSocketID;
     private final ICommunicationManager mCommunicationManager;
     private final DataInputStream mDataInputStream;
 
 
-
     private int QUEUE_CAPACITY = 10;
-    private BlockingQueue<byte []> mWriteQueue;
+    private BlockingQueue<byte[]> mWriteQueue;
     //private InetAddress mAddress;
     //private int mPort;
 
@@ -38,18 +35,17 @@ public class SocketConnetion {
 
 
     private int mCurrentMessageLength;
-    private int mCurrentMessageType ;
-    //TODO temp
-    Random random;
+    private int mCurrentMessageType;
 
-    public SocketConnetion(ILogger ilogger, Socket socket, int socketID, ICommunicationManager communicationManager) {
+    private final String TAG = this.getClass().getSimpleName();
 
-        ilogger.log("Creating chatClient");
-        if ((ilogger == null) ||(socket == null) || (communicationManager == null)){
+    public SocketConnection(Socket socket, int socketID, ICommunicationManager communicationManager) {
+
+        Log.e(TAG, "Creating chatClient");
+        if ((socket == null) || (communicationManager == null)) {
             throw new RuntimeException("Error null argument");
         }
 
-        this.mILogger = ilogger;
         this.mSocket = socket;
         this.mSocketID = socketID;
         this.mCommunicationManager = communicationManager;
@@ -65,16 +61,7 @@ public class SocketConnetion {
         mReadThread = new Thread(new ReadRunnable());
         mReadThread.start();
 
-        random = new Random();
     }
-
-    public void queueRandom() {
-        byte [] byte_message = new byte [BUFFER_SIZE];
-        random.nextBytes(byte_message);
-        //TODO random chars
-        queueMessage(byte_message);
-    }
-
 
     class ReadRunnable implements Runnable {
 
@@ -83,17 +70,15 @@ public class SocketConnetion {
 
             try {
 
-                while (!Thread.currentThread().isInterrupted())
-                {
+                while (!Thread.currentThread().isInterrupted()) {
                     int mCurrentMessageLength = mDataInputStream.readInt();
                     int mCurrentMessageType = mDataInputStream.readInt();
-                    byte [] byteMessage = new byte [mCurrentMessageLength];
+                    byte[] byteMessage = new byte[mCurrentMessageLength];
                     mDataInputStream.readFully(byteMessage);
                     mCommunicationManager.handle(mSocketID, mCurrentMessageType, byteMessage);
                 }
-            } catch (IOException e)
-            {
-                mILogger.log("Read loop error");
+            } catch (IOException e) {
+                Log.e(TAG, "Read loop error");
             }
         }
     }
@@ -115,36 +100,35 @@ public class SocketConnetion {
                     writeMessage(mWriteQueue.take());
 
                 } catch (InterruptedException ie) {
-                    mILogger.log("Message sending loop interrupted, exiting");
+                    Log.e(TAG, "Message sending loop interrupted, exiting");
                 }
             }
         }
     }
 
-    public void queueMessage(byte [] message) {
+    public void queueMessage(byte[] message) {
         //TODO check that message is of buffersize and padd if not
         mWriteQueue.offer(message);
     }
 
-    private void writeMessage(byte [] message)
-    {
+    private void writeMessage(byte[] message) {
         try {
             if (mSocket == null) {
-                mILogger.log("Socket is null, wtf?");
+                Log.e(TAG, "Socket is null, wtf?");
             } else if (mSocket.getOutputStream() == null) {
-                mILogger.log("Socket output stream is null, wtf?");
+                Log.e(TAG, "Socket output stream is null, wtf?");
             }
             OutputStream out = mSocket.getOutputStream();
             out.write(message);
             out.flush();
         } catch (UnknownHostException e) {
-            mILogger.log("Unknown Host");
+            Log.e(TAG, "Unknown Host");
         } catch (IOException e) {
-            mILogger.log("I/O Exception");
+            Log.e(TAG, "I/O Exception");
         } catch (Exception e) {
-            mILogger.log("Error " + e.getMessage());
+            Log.e(TAG, "Error " + e.getMessage());
         }
-        mILogger.log("Client sent message: " + message);
+        Log.e(TAG, "Client sent message: " + message);
     }
 
 
@@ -152,7 +136,7 @@ public class SocketConnetion {
         try {
             mSocket.close();
         } catch (IOException ioe) {
-            mILogger.log( "Error when closing server socket.");
+            Log.e(TAG, "Error when closing server socket.");
         }
     }
 }

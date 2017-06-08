@@ -6,12 +6,12 @@ import static android.R.attr.offset;
  * Created by jaapo on 31-5-2017.
  */
 
-public class CorrelatorPearson
+public class ServiceCorrelatorPearson
 {
     short [][] buffers;
     short [][] write_indexes;
 
-    public CorrelatorPearson(int buffer_count, int buffer_size)
+    public ServiceCorrelatorPearson(int buffer_count, int buffer_size)
     {
 
     }
