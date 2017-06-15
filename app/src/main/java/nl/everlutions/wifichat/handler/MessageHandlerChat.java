@@ -17,6 +17,7 @@ public class MessageHandlerChat implements IMessageHandlerByteArray
 
     @Override
     public void handle(byte[] messageBytes) {
+        //TODO run on ui thread
 
     }
 }

@@ -11,9 +11,9 @@ public class MessageHandlerAudioSend implements IMessageHandlerShortArray {
 
     ICommunicationManager mCommunicationManager;
 
-    public MessageHandlerAudioSend(ICommunicationManager mCommunicationManager)
+    public MessageHandlerAudioSend(ICommunicationManager communicationManager)
     {
-        mCommunicationManager = mCommunicationManager;
+        mCommunicationManager = communicationManager;
     }
 
     @Override

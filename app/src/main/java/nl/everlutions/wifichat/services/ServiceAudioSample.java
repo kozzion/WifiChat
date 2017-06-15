@@ -83,12 +83,12 @@ public class ServiceAudioSample
                             mBufferSizeRecord);
 
                     if (record.getState() != AudioRecord.STATE_INITIALIZED) {
-                        Log.e("ServiceAudioSample", "Audio Record can't initialize!");
+                        Log.e(TAG, "Audio Record can't initialize!");
                         return;
                     }
 
-                    Log.e("ServiceAudioSample", "Start recording");
-                    Log.e("ServiceAudioSample", "Buffers: " + mBufferSizePlay + " " + mBufferSizeRecord);
+                    Log.e(TAG, "Start recording");
+                    Log.e(TAG, "Buffers: " + mBufferSizePlay + " " + mBufferSizeRecord);
                     record.startRecording();
                     while (mIsRecording) {
 
@@ -127,8 +127,8 @@ public class ServiceAudioSample
 
                     playTrack.play();
 
-                    Log.e("Blieb","Audio streaming started");
-                    Log.e("Blieb","mPlayQueue " + mPlayQueue.size());
+                    Log.e(TAG,"Audio streaming started");
+                    Log.e(TAG,"mPlayQueue " + mPlayQueue.size());
                     while (mIsPlaying)
                     {
                         try {

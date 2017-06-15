@@ -17,6 +17,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import nl.everlutions.wifichat.R;
 import nl.everlutions.wifichat.adapters.HostRecyclerListAdapter;
+import nl.everlutions.wifichat.services.ServiceMain;
 import nl.everlutions.wifichat.services.ServiceNSDDiscovery;
 import nl.everlutions.wifichat.utils.ScreenUtils;
 
@@ -41,6 +42,11 @@ public class StartActivity extends AppCompatActivity implements ServiceNSDDiscov
         ButterKnife.bind(this);
         ScreenUtils.hideKeyboardOnCreate(this);
 
+        //Start intent service
+        Intent msgIntent = new Intent(this, ServiceMain.class);
+        msgIntent.putExtra(ServiceMain.PARAM_IN_MSG, "Test hebbes");
+        startService(msgIntent);
+
         mNsdDiscoveryManager = new ServiceNSDDiscovery(this, this);
         mNsdDiscoveryManager.shouldStartDiscovery();
 
@@ -48,7 +54,6 @@ public class StartActivity extends AppCompatActivity implements ServiceNSDDiscov
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mRecyclerView.setAdapter(mHostListAdapter);
-
     }
 
     @OnClick(R.id.btn_host)
