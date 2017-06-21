@@ -1,10 +1,14 @@
 package nl.everlutions.wifichat.activities;
 
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.nsd.NsdServiceInfo;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -34,6 +38,7 @@ public class StartActivity extends AppCompatActivity implements ServiceNSDDiscov
     RecyclerView mRecyclerView;
     @BindView(R.id.start_loader)
     ProgressBar mLoaderView;
+    private BroadcastReceiver mDiscoveryReciever;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -44,11 +49,16 @@ public class StartActivity extends AppCompatActivity implements ServiceNSDDiscov
 
         //Start intent service
         Intent msgIntent = new Intent(this, ServiceMain.class);
-        msgIntent.putExtra(ServiceMain.PARAM_IN_MSG, "Test hebbes");
         startService(msgIntent);
 
-        mNsdDiscoveryManager = new ServiceNSDDiscovery(this, this);
-        mNsdDiscoveryManager.shouldStartDiscovery();
+
+        mDiscoveryReciever = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                NsdServiceInfo info = intent.getParcelableExtra(ServiceMain.SERVICE_MESSAGE);
+                updateHostItems(info);
+            }
+        };
 
         mHostListAdapter = new HostRecyclerListAdapter(this, mOnHostItemClickListener);
         mRecyclerView.setHasFixedSize(true);
@@ -58,7 +68,7 @@ public class StartActivity extends AppCompatActivity implements ServiceNSDDiscov
 
     @OnClick(R.id.btn_host)
     public void onHostButtonClick() {
-        mNsdDiscoveryManager.shouldStopDiscovery();
+//        mNsdDiscoveryManager.shouldStopDiscovery();
         Intent intent = new Intent(this, HostActivity.class);
         intent.putExtra(IKEY_NSD_SERVICE_NAME, mHostInputView.getText().toString());
         startActivity(intent);
@@ -91,5 +101,19 @@ public class StartActivity extends AppCompatActivity implements ServiceNSDDiscov
 
     private void showLoader(boolean showLoader) {
         mLoaderView.setVisibility(showLoader ? View.VISIBLE : View.INVISIBLE);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        LocalBroadcastManager.getInstance(this).registerReceiver((mDiscoveryReciever),
+                new IntentFilter(ServiceMain.FILTER_DISCOVERY)
+        );
+    }
+
+    @Override
+    protected void onPause() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mDiscoveryReciever);
+        super.onPause();
     }
 }

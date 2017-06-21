@@ -10,11 +10,9 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
-
-import io.reactivex.Observable;
-import io.reactivex.ObservableEmitter;
 
 import static android.content.ContentValues.TAG;
 
@@ -24,17 +22,31 @@ import static android.content.ContentValues.TAG;
 
 public class ServiceMain extends Service {
 
-    private ObservableEmitter<Float> pressureObserver;
-    private Observable<Float> pressureObservable;
     //https://stackoverflow.com/questions/14695537/android-update-activity-ui-from-service
 
     private Looper mServiceLooper;
     private ServiceHandler mServiceHandler;
     private final IBinder mBinder = new LocalBinder();
+    private LocalBroadcastManager mBroadCaster;
 
-    public long getSecondsRunning() {
-        mServiceHandler.mIsRunning = false;
-        return mServiceHandler.mRunningSeconds;
+    static final public String SERVICE_RESULT = "nl.everlutions.wifichat.services.SERVICE_RESULT";
+    static final public String FILTER_DISCOVERY = "nl.everlutions.wifichat.services.FILTER_DISCOVERY";
+
+    static final public String SERVICE_MESSAGE = "nl.everlutions.wifichat.services.SERVICE_MESSAGE";
+
+    public void sendTestSeconds(String message) {
+        Intent intent = new Intent(SERVICE_RESULT);
+        if (message != null)
+            intent.putExtra(SERVICE_MESSAGE, message);
+        mBroadCaster.sendBroadcast(intent);
+    }
+
+    public void sendDiscoveryResult(NsdServiceInfo infoObject) {
+        Log.e(TAG, "sendDiscoveryResult: " + infoObject.toString());
+        Intent intent = new Intent(FILTER_DISCOVERY);
+        if (infoObject != null)
+            intent.putExtra(SERVICE_MESSAGE, infoObject);
+        mBroadCaster.sendBroadcast(intent);
     }
 
 
@@ -46,37 +58,15 @@ public class ServiceMain extends Service {
 
         public ServiceHandler(Looper looper) {
             super(looper);
-            Log.e(TAG, "ServiceHandler: called threadID: "+ Thread.currentThread().getName());
+            Log.e(TAG, "ServiceHandler: called threadID: " + Thread.currentThread().getName());
         }
 
         @Override
         public void handleMessage(Message msg) {
             Log.e(TAG, "handleMessage: called threadID: " + Thread.currentThread().getName());
-            mIsRunning = true;
-            while(mIsRunning) {
-                try {
-                    Thread.sleep(1000);
-                    Log.e(TAG, "handleMessage: just slept " + Thread.currentThread().getName());
-                    mRunningSeconds += 1;
-
-
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-
         }
     }
 
-
-    @Override
-    public Observable<Float> observePressure() {
-        if(pressureObservable == null) {
-            pressureObservable = Observable.create(emitter -> pressureObserver = emitter);
-            pressureObservable = pressureObservable.share();
-        }
-        return pressureObservable;
-    }
 
     ServiceAudioSample mServiceAudioSample;
     ServiceAudioCorrelatorPearson mServiceAudioCorrelatorPearson;
@@ -101,15 +91,18 @@ public class ServiceMain extends Service {
 
     @Override
     public void onCreate() {
-        Log.e(TAG, "onCreate: serviceMain threadID: "+ Thread.currentThread().getName());
+        Log.e(TAG, "onCreate: serviceMain threadID: " + Thread.currentThread().getName());
         int hoi = Process.THREAD_PRIORITY_BACKGROUND;
-        HandlerThread thread = new HandlerThread("ServiceStartArguments", hoi);
+        HandlerThread thread = new HandlerThread("Service Background Thread", hoi);
         thread.start();
+        Log.e(TAG, "onCreate: serviceBACK threadID: " + thread.getName());
+
+        mBroadCaster = LocalBroadcastManager.getInstance(this);
 
         // Get the HandlerThread's Looper and use it for our Handler
         mServiceLooper = thread.getLooper();
         mServiceHandler = new ServiceHandler(mServiceLooper);
-//        mServiceHandler.handleMessage(new Message());
+        mServiceHandler.sendMessage(new Message());
 
         mServiceAudioSample = new ServiceAudioSample();
         mServiceAudioCorrelatorPearson = new ServiceAudioCorrelatorPearson();
@@ -117,12 +110,12 @@ public class ServiceMain extends Service {
         mServiceNSDDiscovery = new ServiceNSDDiscovery(this, new ServiceNSDDiscovery.Listener() {
             @Override
             public void updateHostItems(NsdServiceInfo hostItem) {
-                //TODO
+                sendDiscoveryResult(hostItem);
             }
         });
+        mServiceNSDDiscovery.shouldStartDiscovery();
         //mServiceNSDRegister = new mServiceNSDRegister(this, this);
     }
-
 
 
     public class LocalBinder extends Binder {
