@@ -2,20 +2,23 @@ package nl.everlutions.wifichat.activities;
 
 
 import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
-import android.widget.Toast;
+import android.util.Log;
 
 import nl.everlutions.wifichat.R;
 import nl.everlutions.wifichat.services.ServiceMain;
 
 import static nl.everlutions.wifichat.IConstants.IKEY_NSD_SERVICE_NAME;
 import static nl.everlutions.wifichat.IConstants.NSD_DEFAULT_HOST_NAME;
+import static nl.everlutions.wifichat.services.ServiceMain.FILTER_TO_SERVICE;
+import static nl.everlutions.wifichat.services.ServiceMain.SERVICE_MESSAGE_HOST_NAME;
+import static nl.everlutions.wifichat.services.ServiceMain.SERVICE_MESSAGE_TYPE;
+import static nl.everlutions.wifichat.services.ServiceMain.SERVICE_MESSAGE_TYPE_HOST;
+import static nl.everlutions.wifichat.services.ServiceMain.SERVICE_MESSAGE_TYPE_STOP_HOST;
 
 public class HostActivity extends AppCompatActivity {
 
@@ -28,6 +31,7 @@ public class HostActivity extends AppCompatActivity {
     private boolean mBound;
 
     private BroadcastReceiver mBroadCastReceiver;
+    private LocalBroadcastManager mBroadCastManager;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -39,31 +43,21 @@ public class HostActivity extends AppCompatActivity {
             hostName = NSD_DEFAULT_HOST_NAME;
         }
 
-        //mServiceNSDCommunication = new ServiceNSDCommunication(this);
-        //mServiceNSDCommunication.startServer(hostName);
+        Intent intent = new Intent(FILTER_TO_SERVICE);
+        intent.putExtra(SERVICE_MESSAGE_TYPE, SERVICE_MESSAGE_TYPE_HOST);
+        intent.putExtra(SERVICE_MESSAGE_HOST_NAME, hostName);
 
-
-        mBroadCastReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String s = intent.getStringExtra(ServiceMain.SERVICE_MESSAGE);
-                Toast.makeText(context, "" + s, Toast.LENGTH_SHORT).show();
-            }
-        };
+        mBroadCastManager = LocalBroadcastManager.getInstance(this);
+        mBroadCastManager.sendBroadcast(intent);
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-        LocalBroadcastManager.getInstance(this).registerReceiver((mBroadCastReceiver),
-                new IntentFilter(ServiceMain.SERVICE_RESULT)
-        );
-    }
-
-    @Override
-    protected void onPause() {
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mBroadCastReceiver);
-        super.onPause();
+    protected void onDestroy() {
+        Log.e(TAG, "onDestroy: ");
+        Intent intent = new Intent(FILTER_TO_SERVICE);
+        intent.putExtra(SERVICE_MESSAGE_TYPE, SERVICE_MESSAGE_TYPE_STOP_HOST);
+        mBroadCastManager.sendBroadcast(intent);
+        super.onDestroy();
     }
 }
 

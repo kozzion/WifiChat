@@ -74,6 +74,7 @@ public class ServiceNSDDiscovery implements NsdManager.DiscoveryListener, NsdMan
     @Override
     public void onServiceLost(NsdServiceInfo nsdServiceInfo) {
         Log.e(TAG, "onServiceLost: " + nsdServiceInfo.toString());
+        mListener.hostItemLost(nsdServiceInfo);
     }
 
     @Override
@@ -89,5 +90,7 @@ public class ServiceNSDDiscovery implements NsdManager.DiscoveryListener, NsdMan
 
     public interface Listener {
         void updateHostItems(NsdServiceInfo hostItem);
+
+        void hostItemLost(NsdServiceInfo hostItem);
     }
 }

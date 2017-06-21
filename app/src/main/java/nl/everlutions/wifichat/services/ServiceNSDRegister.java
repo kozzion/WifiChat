@@ -170,11 +170,12 @@ public class ServiceNSDRegister {
         return mNdsServiceInfoMap.get(service_key);
     }
 
-    public void tearDown() {
+    public void stopOrUnregisterServer() {
         mNsdManager.unregisterService(mRegistrationListener);
     }
 
     public List<String> getServiceKeyList() {
         return new ArrayList(mNdsServiceInfoMap.keySet());
     }
+
 }

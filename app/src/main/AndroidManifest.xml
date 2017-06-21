@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="nl.everlutions.wifichat">
+          package="nl.everlutions.wifichat">
 
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
 
     <uses-permission
         android:name="android.permission.INTERNET"
-        android:required="true" />
+        android:required="true"/>
 
     <application
         android:allowBackup="true"
@@ -18,15 +18,17 @@
         <activity
             android:name=".activities.MainActivity"
             android:screenOrientation="portrait">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity
             android:name=".activities.StartActivity"
-            android:screenOrientation="portrait"></activity>
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
         <activity
             android:name=".activities.HostActivity"
             android:screenOrientation="portrait"></activity>
@@ -34,7 +36,7 @@
             android:name=".activities.JoinActivity"
             android:screenOrientation="portrait"></activity>
 
-        <service android:name=".services.ServiceMain" />
+        <service android:name=".services.ServiceMain"/>
     </application>
 
 </manifest>

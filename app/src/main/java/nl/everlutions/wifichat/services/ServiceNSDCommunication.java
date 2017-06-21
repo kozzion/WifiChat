@@ -134,7 +134,9 @@ public class ServiceNSDCommunication implements ICommunicationManager {
     }
 
     public void stopServer() {
-        Log.e(TAG, "Does nothing");
+        Log.e(TAG, "stopServer");
+        mNsdHelper.stopOrUnregisterServer();
+        mServerThread.interrupt();
     }
 
     public void startDiscovering() {
@@ -180,7 +182,7 @@ public class ServiceNSDCommunication implements ICommunicationManager {
     }
 
     public void onDestroy() {
-        mNsdHelper.tearDown();
+        mNsdHelper.stopOrUnregisterServer();
         if (mIsServerRunning) {
             mServerConnection.tearDown();
         }

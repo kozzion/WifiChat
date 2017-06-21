@@ -12,6 +12,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ProgressBar;
@@ -26,8 +27,11 @@ import nl.everlutions.wifichat.services.ServiceNSDDiscovery;
 import nl.everlutions.wifichat.utils.ScreenUtils;
 
 import static nl.everlutions.wifichat.IConstants.IKEY_NSD_SERVICE_NAME;
+import static nl.everlutions.wifichat.services.ServiceMain.ACTIVITY_MESSAGE_TYPE;
+import static nl.everlutions.wifichat.services.ServiceMain.ACTIVITY_MESSAGE_TYPE_DISCOVERY_FOUND;
+import static nl.everlutions.wifichat.services.ServiceMain.ACTIVITY_MESSAGE_TYPE_DISCOVERY_LOST;
 
-public class StartActivity extends AppCompatActivity implements ServiceNSDDiscovery.Listener {
+public class StartActivity extends AppCompatActivity {
 
     private ServiceNSDDiscovery mNsdDiscoveryManager;
     private HostRecyclerListAdapter mHostListAdapter;
@@ -55,8 +59,14 @@ public class StartActivity extends AppCompatActivity implements ServiceNSDDiscov
         mDiscoveryReciever = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                NsdServiceInfo info = intent.getParcelableExtra(ServiceMain.SERVICE_MESSAGE);
-                updateHostItems(info);
+                NsdServiceInfo info = intent.getParcelableExtra(ServiceMain.ACTIVITY_MESSAGE_RESULT);
+                String messageType = intent.getStringExtra(ACTIVITY_MESSAGE_TYPE);
+                Log.e("TAG", "onReceive: " + messageType);
+                if (messageType.equalsIgnoreCase(ACTIVITY_MESSAGE_TYPE_DISCOVERY_FOUND)) {
+                    updateHostItems(info);
+                } else if (messageType.equalsIgnoreCase(ACTIVITY_MESSAGE_TYPE_DISCOVERY_LOST)) {
+                    hostItemLost(info);
+                }
             }
         };
 
@@ -88,15 +98,14 @@ public class StartActivity extends AppCompatActivity implements ServiceNSDDiscov
         }
     };
 
-    @Override
     public void updateHostItems(final NsdServiceInfo hostItem) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                showLoader(false);
-                mHostListAdapter.addHostItem(hostItem);
-            }
-        });
+        showLoader(false);
+        mHostListAdapter.addHostItem(hostItem);
+    }
+
+    public void hostItemLost(final NsdServiceInfo nsdServiceInfo) {
+        mHostListAdapter.removeHostItem(nsdServiceInfo);
+        showLoader(mHostListAdapter.getItemCount() == 0);
     }
 
     private void showLoader(boolean showLoader) {

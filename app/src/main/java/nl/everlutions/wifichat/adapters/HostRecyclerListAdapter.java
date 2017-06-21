@@ -57,6 +57,19 @@ public class HostRecyclerListAdapter extends RecyclerView.Adapter<HostRecyclerLi
         notifyDataSetChanged();
     }
 
+    public void removeHostItem(NsdServiceInfo hostItem) {
+        int removeIndex = -1;
+        for (int i = 0; i < mHostItems.size(); i++) {
+            if (mHostItems.get(i).getServiceName().equalsIgnoreCase(hostItem.getServiceName())) {
+                removeIndex = i;
+            }
+        }
+        if (removeIndex != -1) {
+            mHostItems.remove(removeIndex);
+        }
+        notifyDataSetChanged();
+    }
+
     public NsdServiceInfo getHostItem(int position) {
         return mHostItems.get(position);
     }
