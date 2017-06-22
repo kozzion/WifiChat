@@ -23,7 +23,6 @@ import butterknife.OnClick;
 import nl.everlutions.wifichat.R;
 import nl.everlutions.wifichat.adapters.HostRecyclerListAdapter;
 import nl.everlutions.wifichat.services.ServiceMain;
-import nl.everlutions.wifichat.services.ServiceNSDDiscovery;
 import nl.everlutions.wifichat.utils.ScreenUtils;
 
 import static nl.everlutions.wifichat.IConstants.IKEY_NSD_SERVICE_NAME;
@@ -33,7 +32,8 @@ import static nl.everlutions.wifichat.services.ServiceMain.ACTIVITY_MESSAGE_TYPE
 
 public class StartActivity extends AppCompatActivity {
 
-    private ServiceNSDDiscovery mNsdDiscoveryManager;
+    private final String TAG = this.getClass().getSimpleName();
+
     private HostRecyclerListAdapter mHostListAdapter;
 
     @BindView(R.id.start_input_host_name)
@@ -59,13 +59,19 @@ public class StartActivity extends AppCompatActivity {
         mDiscoveryReciever = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                NsdServiceInfo info = intent.getParcelableExtra(ServiceMain.ACTIVITY_MESSAGE_RESULT);
                 String messageType = intent.getStringExtra(ACTIVITY_MESSAGE_TYPE);
+                NsdServiceInfo info = intent.getParcelableExtra(ServiceMain.ACTIVITY_MESSAGE_RESULT);
+
                 Log.e("TAG", "onReceive: " + messageType);
-                if (messageType.equalsIgnoreCase(ACTIVITY_MESSAGE_TYPE_DISCOVERY_FOUND)) {
-                    updateHostItems(info);
-                } else if (messageType.equalsIgnoreCase(ACTIVITY_MESSAGE_TYPE_DISCOVERY_LOST)) {
-                    hostItemLost(info);
+                switch (messageType) {
+                    case ACTIVITY_MESSAGE_TYPE_DISCOVERY_FOUND:
+                        updateHostItems(info);
+                        break;
+                    case ACTIVITY_MESSAGE_TYPE_DISCOVERY_LOST:
+                        hostItemLost(info);
+                        break;
+                    default:
+                        Log.e(TAG, "OnReceive message Unhandled! " + messageType);
                 }
             }
         };
@@ -78,7 +84,6 @@ public class StartActivity extends AppCompatActivity {
 
     @OnClick(R.id.btn_host)
     public void onHostButtonClick() {
-//        mNsdDiscoveryManager.shouldStopDiscovery();
         Intent intent = new Intent(this, HostActivity.class);
         intent.putExtra(IKEY_NSD_SERVICE_NAME, mHostInputView.getText().toString());
         startActivity(intent);

@@ -1,24 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    >
+    android:background="@color/base_white_off"
+    android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/host_remote_queue"
-        style="@style/host_screen_labels"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Remote queue:"/>
+    <ScrollView
+        android:id="@+id/scrollview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/host_chat_input"
+        android:background="#ffffff">
 
-    <TextView
-        android:id="@+id/host_local_queue"
-        style="@style/host_screen_labels"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Local queue:"/>
+        <TextView
+            android:id="@+id/host_output"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+    </ScrollView>
 
+    <EditText
+        android:id="@+id/host_chat_input"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:layout_alignParentBottom="true"
+        android:layout_toLeftOf="@+id/host_send_btn"
+        android:background="@android:color/darker_gray"
+        android:hint="type your message here..."
+        android:inputType="text"
+        android:maxLines="1"
+        android:padding="4dp"/>
 
-</LinearLayout>
+    <Button
+        android:id="@+id/host_send_btn"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:text="send"/>
+
+</RelativeLayout>

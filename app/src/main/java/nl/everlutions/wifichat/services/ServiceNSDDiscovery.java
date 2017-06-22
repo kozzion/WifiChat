@@ -5,6 +5,9 @@ import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
 import android.util.Log;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static nl.everlutions.wifichat.IConstants.NSD_SERVICE_TYPE;
 
 public class ServiceNSDDiscovery implements NsdManager.DiscoveryListener, NsdManager.ResolveListener {
@@ -13,10 +16,13 @@ public class ServiceNSDDiscovery implements NsdManager.DiscoveryListener, NsdMan
 
     private final NsdManager mNsdManager;
     private final Listener mListener;
+    private Map<String, NsdServiceInfo> mNdsServiceInfoMap;
+
 
     public ServiceNSDDiscovery(Context context, Listener listener) {
         mNsdManager = (NsdManager) context.getSystemService(Context.NSD_SERVICE);
         mListener = listener;
+        mNdsServiceInfoMap = new HashMap<>();
     }
 
     public void shouldStartDiscovery() {
@@ -73,7 +79,13 @@ public class ServiceNSDDiscovery implements NsdManager.DiscoveryListener, NsdMan
 
     @Override
     public void onServiceLost(NsdServiceInfo nsdServiceInfo) {
-        Log.e(TAG, "onServiceLost: " + nsdServiceInfo.toString());
+        String key = nsdServiceInfo.getHost().toString() + nsdServiceInfo.getServiceName();
+        Log.e(TAG, "onServiceLost: " + key);
+        if (mNdsServiceInfoMap.containsKey(key)) {
+            Log.e(TAG, "service removed" + key);
+            mNdsServiceInfoMap.remove(key);
+        }
+
         mListener.hostItemLost(nsdServiceInfo);
     }
 
@@ -84,7 +96,17 @@ public class ServiceNSDDiscovery implements NsdManager.DiscoveryListener, NsdMan
 
     @Override
     public void onServiceResolved(NsdServiceInfo nsdServiceInfo) {
-        Log.e(TAG, "onServiceResolved: " + nsdServiceInfo.toString());
+        String key = nsdServiceInfo.getHost().toString() + nsdServiceInfo.getServiceName();
+        Log.e(TAG, "onServiceResolved: " + key);
+        if (mNdsServiceInfoMap.containsKey(key)) {
+            Log.e(TAG, "Duplicate Service" + key);
+        } else {
+            mNdsServiceInfoMap.put(key, nsdServiceInfo);
+        }
+    }
+
+    public NsdServiceInfo getServiceInfo(String service_key) {
+        return mNdsServiceInfoMap.get(service_key);
     }
 
 

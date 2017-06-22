@@ -81,40 +81,4 @@
         </LinearLayout>
     </LinearLayout>
 
-
-    <ScrollView
-        android:id="@+id/scrollview"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@+id/chatInput"
-        android:layout_below="@+id/button_holder">
-
-        <TextView
-            android:id="@+id/status"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-    </ScrollView>
-
-    <EditText
-        android:id="@+id/chatInput"
-        android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:layout_alignParentBottom="true"
-        android:layout_toLeftOf="@+id/send_btn"
-
-        android:background="@android:color/darker_gray"
-        android:hint="type your message here..."
-        android:inputType="text"
-        android:maxLines="1"
-        android:padding="4dp"/>
-
-    <Button
-        android:id="@+id/send_btn"
-        android:layout_width="96dp"
-        android:layout_height="64dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:text="send"/>
-
-
 </RelativeLayout>

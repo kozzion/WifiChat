@@ -16,11 +16,6 @@
         android:theme="@style/AppTheme">
 
         <activity
-            android:name=".activities.MainActivity"
-            android:screenOrientation="portrait">
-
-        </activity>
-        <activity
             android:name=".activities.StartActivity"
             android:screenOrientation="portrait">
             <intent-filter>

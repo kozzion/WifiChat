@@ -1,7 +1,5 @@
 package nl.everlutions.wifichat.handler;
 
-import nl.everlutions.wifichat.activities.MainActivity;
-
 /**
  * Created by jaapo on 6-6-2017.
  */

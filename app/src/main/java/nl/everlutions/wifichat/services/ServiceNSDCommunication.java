@@ -1,9 +1,10 @@
 package nl.everlutions.wifichat.services;
 
-import android.content.Context;
+import android.content.Intent;
 import android.net.nsd.NsdServiceInfo;
 import android.os.Bundle;
 import android.os.Message;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import java.io.IOException;
@@ -12,17 +13,22 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import nl.everlutions.wifichat.handler.IMessageHandlerByteArray;
+
+import static nl.everlutions.wifichat.services.ServiceMain.ACTIVITY_MESSAGE_RESULT;
+import static nl.everlutions.wifichat.services.ServiceMain.ACTIVITY_MESSAGE_TYPE;
+import static nl.everlutions.wifichat.services.ServiceMain.ACTIVITY_MESSAGE_TYPE_CLIENT_JOINED;
+import static nl.everlutions.wifichat.services.ServiceMain.FILTER_TO_HOST;
 
 /**
  * Created by jaapo on 14-5-2017.
  */
 
 public class ServiceNSDCommunication implements ICommunicationManager {
-    private final ServiceNSDRegister mNsdHelper;
+    private final LocalBroadcastManager mBroadCastManager;
+    private final ServiceMain mServiceMain;
 
 
     public boolean mIsServerRunning;
@@ -44,10 +50,11 @@ public class ServiceNSDCommunication implements ICommunicationManager {
 
     private final String TAG = this.getClass().getSimpleName();
 
-    public ServiceNSDCommunication(Context context) {
-        this.mNsdHelper = new ServiceNSDRegister(context);
+    public ServiceNSDCommunication(ServiceMain serviceMain) {
+        mServiceMain = serviceMain;
         this.mClientConnectionMap = new HashMap<>();
         this.mHandlerMap = new HashMap<>();
+        mBroadCastManager = LocalBroadcastManager.getInstance(serviceMain);
     }
 
     public void addMessageHandler(int socketID, int messageType, IMessageHandlerByteArray messageHandler) {
@@ -65,14 +72,26 @@ public class ServiceNSDCommunication implements ICommunicationManager {
     public void addClientSocket(Socket socket) {
         Log.e(TAG, "addClientSocket");
         String key = socket.getInetAddress().toString();
+
         if (mClientConnectionMap.containsKey(key)) {
             Log.e(TAG, "Duplciate connetion: " + key);
         }
+
         Log.e(TAG, "Connected: " + key);
         mClientConnectionMap.put(key, new SocketConnection(socket, 0, this));
+        broadcastClientJoined(key);
+
 
         //TODO add thread
         //TODO add handlers?
+    }
+
+    private void broadcastClientJoined(String clientInetAddress) {
+        Log.e(TAG, "broadcastClientJoined");
+        Intent intent = new Intent(FILTER_TO_HOST);
+        intent.putExtra(ACTIVITY_MESSAGE_RESULT, clientInetAddress);
+        intent.putExtra(ACTIVITY_MESSAGE_TYPE, ACTIVITY_MESSAGE_TYPE_CLIENT_JOINED);
+        mBroadCastManager.sendBroadcast(intent);
     }
 
 
@@ -127,7 +146,7 @@ public class ServiceNSDCommunication implements ICommunicationManager {
             mServerThread = new Thread(new ServerRunnable());
             mServerThread.start();
 
-            mNsdHelper.registerService(mServerSocket.getLocalPort(), serviceName);
+            mServiceMain.mServiceNSDRegister.registerService(mServerSocket.getLocalPort(), serviceName);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -135,28 +154,15 @@ public class ServiceNSDCommunication implements ICommunicationManager {
 
     public void stopServer() {
         Log.e(TAG, "stopServer");
-        mNsdHelper.stopOrUnregisterServer();
+        mServiceMain.mServiceNSDRegister.stopOrUnregisterServer();
         mServerThread.interrupt();
-    }
-
-    public void startDiscovering() {
-        Log.e(TAG, "startDiscovering");
-        mNsdHelper.startDiscoverServices();
-        mIsDiscovering = true;
-
-    }
-
-    public void stopDiscovering() {
-        Log.e(TAG, "stopDiscovering");
-        mNsdHelper.stopDiscoverServices();
-        mIsDiscovering = false;
     }
 
     public void connectToService(final String serviceKey) {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                NsdServiceInfo info = mNsdHelper.getServiceInfo(serviceKey);
+                NsdServiceInfo info = mServiceMain.mServiceNSDDiscovery.getServiceInfo(serviceKey);
                 try {
                     //TODO what if mServerConnection is not null
                     mServerConnection = new SocketConnection(new Socket(info.getHost(), info.getPort()), 0, ServiceNSDCommunication.this);
@@ -182,14 +188,10 @@ public class ServiceNSDCommunication implements ICommunicationManager {
     }
 
     public void onDestroy() {
-        mNsdHelper.stopOrUnregisterServer();
+        mServiceMain.mServiceNSDRegister.stopOrUnregisterServer();
         if (mIsServerRunning) {
             mServerConnection.tearDown();
         }
-    }
-
-    public List<String> getServiceKeyList() {
-        return mNsdHelper.getServiceKeyList();
     }
 
     public void queueRecording(final short[] audioRecordBuffer, final int toWriteCount) {
