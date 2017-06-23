@@ -5,7 +5,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.net.nsd.NsdServiceInfo;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Process;
@@ -42,6 +41,8 @@ public class ServiceMain extends Service {
     static final public String SERVICE_MESSAGE_TYPE = "nl.everlutions.wifichat.services.SERVICE_MESSAGE_TYPE";
     static final public String SERVICE_MESSAGE_TYPE_HOST = "nl.everlutions.wifichat.services.SERVICE_MESSAGE_TYPE_HOST";
     static final public String SERVICE_MESSAGE_TYPE_STOP_HOST = "nl.everlutions.wifichat.services.SERVICE_MESSAGE_TYPE_STOP_HOST";
+    static final public String SERVICE_MESSAGE_TYPE_JOIN = "nl.everlutions.wifichat.services.SERVICE_MESSAGE_TYPE_JOIN";
+
 
     static final public String SERVICE_MESSAGE_HOST_NAME = "nl.everlutions.wifichat.services.SERVICE_MESSAGE_HOST_NAME";
 
@@ -73,17 +74,7 @@ public class ServiceMain extends Service {
         mServiceNSDCommunication = new ServiceNSDCommunication(this);
         mServiceNSDRegister = new ServiceNSDRegister(this);
 
-        mServiceNSDDiscovery = new ServiceNSDDiscovery(this, new ServiceNSDDiscovery.Listener() {
-            @Override
-            public void updateHostItems(NsdServiceInfo hostItem) {
-                sendDiscoveryResult(hostItem, ACTIVITY_MESSAGE_TYPE_DISCOVERY_FOUND);
-            }
-
-            @Override
-            public void hostItemLost(NsdServiceInfo hostItem) {
-                sendDiscoveryResult(hostItem, ACTIVITY_MESSAGE_TYPE_DISCOVERY_LOST);
-            }
-        });
+        mServiceNSDDiscovery = new ServiceNSDDiscovery(this);
         mServiceNSDDiscovery.shouldStartDiscovery();
 
         LocalBroadcastManager.getInstance(this).registerReceiver((mBroadCastReceiver),
@@ -113,25 +104,10 @@ public class ServiceMain extends Service {
     }
 
 
-    public void sendDiscoveryResult(NsdServiceInfo infoObject, String messageType) {
-        Log.e(TAG, "sendDiscoveryResult: " + infoObject.toString());
-        Intent intent = new Intent(FILTER_DISCOVERY);
-        intent.putExtra(ACTIVITY_MESSAGE_RESULT, infoObject);
-        intent.putExtra(ACTIVITY_MESSAGE_TYPE, messageType);
-        mBroadCastManager.sendBroadcast(intent);
-    }
-
     private void handleServiceMessage(Intent intent) {
         String serviceMessageType = intent.getStringExtra(ServiceMain.SERVICE_MESSAGE_TYPE);
         Log.e(TAG, "handleServiceMessage: " + serviceMessageType);
         switch (serviceMessageType) {
-            case SERVICE_MESSAGE_TYPE_HOST:
-                String hostName = intent.getStringExtra(SERVICE_MESSAGE_HOST_NAME);
-                mServiceNSDCommunication.startServer(hostName);
-                break;
-            case SERVICE_MESSAGE_TYPE_STOP_HOST:
-                mServiceNSDCommunication.stopServer();
-                break;
             default:
                 Log.e(TAG, "service message NOT handled");
         }

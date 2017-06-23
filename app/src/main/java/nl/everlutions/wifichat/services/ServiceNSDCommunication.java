@@ -1,6 +1,9 @@
 package nl.everlutions.wifichat.services;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.nsd.NsdServiceInfo;
 import android.os.Bundle;
 import android.os.Message;
@@ -21,6 +24,11 @@ import static nl.everlutions.wifichat.services.ServiceMain.ACTIVITY_MESSAGE_RESU
 import static nl.everlutions.wifichat.services.ServiceMain.ACTIVITY_MESSAGE_TYPE;
 import static nl.everlutions.wifichat.services.ServiceMain.ACTIVITY_MESSAGE_TYPE_CLIENT_JOINED;
 import static nl.everlutions.wifichat.services.ServiceMain.FILTER_TO_HOST;
+import static nl.everlutions.wifichat.services.ServiceMain.SERVICE_MESSAGE_HOST_NAME;
+import static nl.everlutions.wifichat.services.ServiceMain.SERVICE_MESSAGE_TYPE_HOST;
+import static nl.everlutions.wifichat.services.ServiceMain.SERVICE_MESSAGE_TYPE_JOIN;
+import static nl.everlutions.wifichat.services.ServiceMain.SERVICE_MESSAGE_TYPE_STOP_HOST;
+import static nl.everlutions.wifichat.services.ServiceMain.SERVICE_RESULT;
 
 /**
  * Created by jaapo on 14-5-2017.
@@ -49,13 +57,44 @@ public class ServiceNSDCommunication implements ICommunicationManager {
     long mTimeOfLastUodate;
 
     private final String TAG = this.getClass().getSimpleName();
+    private final BroadcastReceiver mBroadCastReceiver;
 
     public ServiceNSDCommunication(ServiceMain serviceMain) {
         mServiceMain = serviceMain;
         this.mClientConnectionMap = new HashMap<>();
         this.mHandlerMap = new HashMap<>();
         mBroadCastManager = LocalBroadcastManager.getInstance(serviceMain);
+        mBroadCastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                handleServiceMessage(intent);
+            }
+        };
+        LocalBroadcastManager.getInstance(serviceMain).registerReceiver((mBroadCastReceiver),
+                new IntentFilter(ServiceMain.FILTER_TO_SERVICE)
+        );
     }
+
+    private void handleServiceMessage(Intent intent) {
+        String serviceMessageType = intent.getStringExtra(ServiceMain.SERVICE_MESSAGE_TYPE);
+        Log.e(TAG, "handleServiceMessage: " + serviceMessageType);
+        switch (serviceMessageType) {
+            case SERVICE_MESSAGE_TYPE_HOST:
+                String hostName = intent.getStringExtra(SERVICE_MESSAGE_HOST_NAME);
+                startServer(hostName);
+                break;
+            case SERVICE_MESSAGE_TYPE_STOP_HOST:
+                stopServer();
+                break;
+            case SERVICE_MESSAGE_TYPE_JOIN:
+                String serviceKey = intent.getStringExtra(SERVICE_RESULT);
+                connectToService(serviceKey);
+                break;
+            default:
+                Log.e(TAG, "service message NOT handled");
+        }
+    }
+
 
     public void addMessageHandler(int socketID, int messageType, IMessageHandlerByteArray messageHandler) {
         if (!mHandlerMap.containsKey(socketID)) {

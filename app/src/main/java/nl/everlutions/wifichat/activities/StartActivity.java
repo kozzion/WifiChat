@@ -96,7 +96,7 @@ public class StartActivity extends AppCompatActivity {
             int position = mRecyclerView.getChildAdapterPosition(view);
             NsdServiceInfo hostItem = mHostListAdapter.getHostItem(position);
             String serviceName = hostItem.getServiceName();
-
+            Log.e(TAG, "onClick: join service: " + serviceName);
             Intent intent = new Intent(StartActivity.this, JoinActivity.class);
             intent.putExtra(IKEY_NSD_SERVICE_NAME, serviceName);
             startActivity(intent);

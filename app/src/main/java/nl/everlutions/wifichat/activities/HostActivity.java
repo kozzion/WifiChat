@@ -33,12 +33,6 @@ public class HostActivity extends AppCompatActivity {
 
     private final String TAG = this.getClass().getSimpleName();
 
-    //private ServiceNSDCommunication mServiceNSDCommunication;
-    // public static String ACTION_RESP = "Boem";
-
-    ServiceMain mService;
-    private boolean mBound;
-
     @BindView(R.id.host_output)
     TextView mHostOutputView;
     @BindView(R.id.host_chat_input)
