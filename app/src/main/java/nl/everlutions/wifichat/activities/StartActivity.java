@@ -16,6 +16,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -42,6 +43,9 @@ public class StartActivity extends AppCompatActivity {
     RecyclerView mRecyclerView;
     @BindView(R.id.start_loader)
     ProgressBar mLoaderView;
+    @BindView(R.id.version_view)
+    TextView mVersionView;
+
     private BroadcastReceiver mDiscoveryReciever;
 
     @Override
@@ -121,7 +125,7 @@ public class StartActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         LocalBroadcastManager.getInstance(this).registerReceiver((mDiscoveryReciever),
-                new IntentFilter(ServiceMain.FILTER_DISCOVERY)
+                new IntentFilter(ServiceMain.FILTER_SERVICE_DISCOVERY)
         );
     }
 

@@ -15,7 +15,7 @@ import static nl.everlutions.wifichat.services.ServiceMain.ACTIVITY_MESSAGE_RESU
 import static nl.everlutions.wifichat.services.ServiceMain.ACTIVITY_MESSAGE_TYPE;
 import static nl.everlutions.wifichat.services.ServiceMain.ACTIVITY_MESSAGE_TYPE_DISCOVERY_FOUND;
 import static nl.everlutions.wifichat.services.ServiceMain.ACTIVITY_MESSAGE_TYPE_DISCOVERY_LOST;
-import static nl.everlutions.wifichat.services.ServiceMain.FILTER_DISCOVERY;
+import static nl.everlutions.wifichat.services.ServiceMain.FILTER_SERVICE_DISCOVERY;
 
 public class ServiceNSDDiscovery implements NsdManager.DiscoveryListener {
 
@@ -111,7 +111,7 @@ public class ServiceNSDDiscovery implements NsdManager.DiscoveryListener {
 
     public void sendDiscoveryResult(NsdServiceInfo infoObject, String messageType) {
         Log.e(TAG, "sendDiscoveryResult: " + infoObject.toString());
-        Intent intent = new Intent(FILTER_DISCOVERY);
+        Intent intent = new Intent(FILTER_SERVICE_DISCOVERY);
         intent.putExtra(ACTIVITY_MESSAGE_RESULT, infoObject);
         intent.putExtra(ACTIVITY_MESSAGE_TYPE, messageType);
         mBroadCastManager.sendBroadcast(intent);

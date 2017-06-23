@@ -3,8 +3,8 @@ package nl.everlutions.wifichat.services;
 import android.util.Log;
 
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -23,10 +23,11 @@ public class SocketConnection {
     private final int mSocketID;
     private final ICommunicationManager mCommunicationManager;
     private final DataInputStream mDataInputStream;
+    private final DataOutputStream mDataOutputStream;
 
 
     private int QUEUE_CAPACITY = 10;
-    private BlockingQueue<byte[]> mWriteQueue;
+    private BlockingQueue<ConnectionMessage> mWriteQueue;
     //private InetAddress mAddress;
     //private int mPort;
 
@@ -54,7 +55,11 @@ public class SocketConnection {
         } catch (IOException e) {
             throw new RuntimeException("Stream wrap failed");
         }
-
+        try {
+            mDataOutputStream = new DataOutputStream(mSocket.getOutputStream());
+        } catch (IOException e) {
+            throw new RuntimeException("OutputStream wrap failed");
+        }
         mWriteQueue = new ArrayBlockingQueue<>(QUEUE_CAPACITY);
         mWriteThread = new Thread(new WriteRunnable());
         mWriteThread.start();
@@ -88,17 +93,9 @@ public class SocketConnection {
 
         @Override
         public void run() {
-            //try {
-            //} catch (UnknownHostException e) {
-            //    Log.d(CLIENT_TAG, "Initializing socket failed, UHE", e);
-            //} catch (IOException e) {
-            //    Log.d(CLIENT_TAG, "Initializing socket failed, IOE.", e);
-            //}
-
             while (true) {
                 try {
                     writeMessage(mWriteQueue.take());
-
                 } catch (InterruptedException ie) {
                     Log.e(TAG, "Message sending loop interrupted, exiting");
                 }
@@ -106,21 +103,17 @@ public class SocketConnection {
         }
     }
 
-    public void queueMessage(byte[] message) {
+    public void queueMessage(ConnectionMessage connectionMessage) {
         //TODO check that message is of buffersize and padd if not
-        mWriteQueue.offer(message);
+        mWriteQueue.offer(connectionMessage);
     }
 
-    private void writeMessage(byte[] message) {
+    private void writeMessage(ConnectionMessage message) {
         try {
-            if (mSocket == null) {
-                Log.e(TAG, "Socket is null, wtf?");
-            } else if (mSocket.getOutputStream() == null) {
-                Log.e(TAG, "Socket output stream is null, wtf?");
-            }
-            OutputStream out = mSocket.getOutputStream();
-            out.write(message);
-            out.flush();
+            mDataOutputStream.writeInt(message.payload.length);
+            mDataOutputStream.writeInt(message.type);
+            mDataOutputStream.write(message.payload);
+            mDataOutputStream.flush();
         } catch (UnknownHostException e) {
             Log.e(TAG, "Unknown Host");
         } catch (IOException e) {

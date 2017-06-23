@@ -27,8 +27,8 @@ public class ServiceMain extends Service {
     private BroadcastReceiver mBroadCastReceiver;
 
     static final public String FILTER_TO_SERVICE = "nl.everlutions.wifichat.services.FILTER_TO_SERVICE";
-    static final public String FILTER_TO_HOST = "nl.everlutions.wifichat.services.FILTER_TO_HOST";
-    static final public String FILTER_DISCOVERY = "nl.everlutions.wifichat.services.FILTER_DISCOVERY";
+    static final public String FILTER_SERVICE_DISCOVERY = "nl.everlutions.wifichat.services.FILTER_SERVICE_DISCOVERY";
+    static final public String FILTER_TO_UI = "nl.everlutions.wifichat.services.FILTER_TO_UI";
 
     static final public String ACTIVITY_MESSAGE_RESULT = "nl.everlutions.wifichat.services.ACTIVITY_MESSAGE_RESULT";
 
@@ -36,12 +36,15 @@ public class ServiceMain extends Service {
     static final public String ACTIVITY_MESSAGE_TYPE_DISCOVERY_FOUND = "nl.everlutions.wifichat.services.ACTIVITY_MESSAGE_TYPE_DISCOVERY_FOUND";
     static final public String ACTIVITY_MESSAGE_TYPE_DISCOVERY_LOST = "nl.everlutions.wifichat.services.ACTIVITY_MESSAGE_TYPE_DISCOVERY_LOST";
     static final public String ACTIVITY_MESSAGE_TYPE_CLIENT_JOINED = "nl.everlutions.wifichat.services.ACTIVITY_MESSAGE_TYPE_CLIENT_JOINED";
+    static final public String ACTIVITY_MESSAGE_TYPE_SHOW_CHAT = "nl.everlutions.wifichat.services.ACTIVITY_MESSAGE_TYPE_SHOW_CHAT";
 
     static final public String SERVICE_RESULT = "nl.everlutions.wifichat.services.SERVICE_RESULT";
     static final public String SERVICE_MESSAGE_TYPE = "nl.everlutions.wifichat.services.SERVICE_MESSAGE_TYPE";
     static final public String SERVICE_MESSAGE_TYPE_HOST = "nl.everlutions.wifichat.services.SERVICE_MESSAGE_TYPE_HOST";
     static final public String SERVICE_MESSAGE_TYPE_STOP_HOST = "nl.everlutions.wifichat.services.SERVICE_MESSAGE_TYPE_STOP_HOST";
     static final public String SERVICE_MESSAGE_TYPE_JOIN = "nl.everlutions.wifichat.services.SERVICE_MESSAGE_TYPE_JOIN";
+    static final public String SERVICE_MESSAGE_TYPE_SEND_REQUEST_CHAT = "nl.everlutions.wifichat.services.SERVICE_MESSAGE_TYPE_SEND_REQUEST_CHAT";
+    static final public String SERVICE_MESSAGE_TYPE_SEND_COMMAND_CHAT = "nl.everlutions.wifichat.services.SERVICE_MESSAGE_TYPE_SEND_COMMAND_CHAT";
 
 
     static final public String SERVICE_MESSAGE_HOST_NAME = "nl.everlutions.wifichat.services.SERVICE_MESSAGE_HOST_NAME";

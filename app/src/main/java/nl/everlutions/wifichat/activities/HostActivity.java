@@ -23,11 +23,14 @@ import static nl.everlutions.wifichat.IConstants.IKEY_NSD_SERVICE_NAME;
 import static nl.everlutions.wifichat.IConstants.NSD_DEFAULT_HOST_NAME;
 import static nl.everlutions.wifichat.services.ServiceMain.ACTIVITY_MESSAGE_TYPE;
 import static nl.everlutions.wifichat.services.ServiceMain.ACTIVITY_MESSAGE_TYPE_CLIENT_JOINED;
+import static nl.everlutions.wifichat.services.ServiceMain.ACTIVITY_MESSAGE_TYPE_SHOW_CHAT;
 import static nl.everlutions.wifichat.services.ServiceMain.FILTER_TO_SERVICE;
 import static nl.everlutions.wifichat.services.ServiceMain.SERVICE_MESSAGE_HOST_NAME;
 import static nl.everlutions.wifichat.services.ServiceMain.SERVICE_MESSAGE_TYPE;
 import static nl.everlutions.wifichat.services.ServiceMain.SERVICE_MESSAGE_TYPE_HOST;
+import static nl.everlutions.wifichat.services.ServiceMain.SERVICE_MESSAGE_TYPE_SEND_COMMAND_CHAT;
 import static nl.everlutions.wifichat.services.ServiceMain.SERVICE_MESSAGE_TYPE_STOP_HOST;
+import static nl.everlutions.wifichat.services.ServiceMain.SERVICE_RESULT;
 
 public class HostActivity extends AppCompatActivity {
 
@@ -73,7 +76,7 @@ public class HostActivity extends AppCompatActivity {
     public void onSendClicked() {
         String input = mHostChatInputView.getText().toString();
         if (!input.isEmpty()) {
-            //TODO: send message to Service
+            sendMessageToClients(input);
             addToTextLine(input);
             mHostChatInputView.setText("");
         }
@@ -85,22 +88,35 @@ public class HostActivity extends AppCompatActivity {
 
     private void handleIntent(Intent intent) {
         String messageType = intent.getStringExtra(ACTIVITY_MESSAGE_TYPE);
-        String inetAddress = intent.getStringExtra(ServiceMain.ACTIVITY_MESSAGE_RESULT);
+
         Log.e("TAG", "onReceive: " + messageType);
         switch (messageType) {
             case ACTIVITY_MESSAGE_TYPE_CLIENT_JOINED:
+                String inetAddress = intent.getStringExtra(ServiceMain.ACTIVITY_MESSAGE_RESULT);
                 addToTextLine("Client joined: " + inetAddress);
+                break;
+            case ACTIVITY_MESSAGE_TYPE_SHOW_CHAT:
+                String chatMessage = intent.getStringExtra(ServiceMain.ACTIVITY_MESSAGE_RESULT);
+                sendMessageToClients(chatMessage);
+                addToTextLine(chatMessage);
                 break;
             default:
                 Log.e(TAG, "OnReceive message Unhandled! " + messageType);
         }
     }
 
+    private void sendMessageToClients(String input) {
+        Intent intent = new Intent(FILTER_TO_SERVICE);
+        intent.putExtra(SERVICE_MESSAGE_TYPE, SERVICE_MESSAGE_TYPE_SEND_COMMAND_CHAT);
+        intent.putExtra(SERVICE_RESULT, input);
+        mBroadCastManager.sendBroadcast(intent);
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
         LocalBroadcastManager.getInstance(this).registerReceiver((mHostBroadcastReciever),
-                new IntentFilter(ServiceMain.FILTER_TO_HOST)
+                new IntentFilter(ServiceMain.FILTER_TO_UI)
         );
     }
 

@@ -6,8 +6,9 @@ package nl.everlutions.wifichat.services;
 
 public interface ICommunicationManager {
 
-    void handle(int socketID, int messageType, byte [] byteMessage);
+    void handle(int socketID, int messageType, byte[] byteMessage);
 
-    void handleSendToServer(int messageType, byte [] byteMessage);
-    void handleSendToClients(int messageType, byte [] byteMessage);
+    void handleSendToServer(ConnectionMessage connectionMessage);
+
+    void handleSendToClients(ConnectionMessage connectionMessage);
 }
