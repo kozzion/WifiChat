@@ -64,7 +64,7 @@ public class ServiceNSDCommunication implements ICommunicationManager {
         };
 
         LocalBroadcastManager.getInstance(serviceMain).registerReceiver((mBroadCastReceiver),
-                new IntentFilter(ServiceMain.FILTER_TO_SERVICE)
+                new IntentFilter(ServiceMain.FILTER_TO_SERVICE_NSD_COMMUNICATION)
         );
     }
 

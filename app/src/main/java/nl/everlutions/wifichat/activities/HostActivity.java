@@ -10,6 +10,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -24,10 +25,13 @@ import static nl.everlutions.wifichat.IConstants.NSD_DEFAULT_HOST_NAME;
 import static nl.everlutions.wifichat.services.ServiceMain.ACTIVITY_MESSAGE_TYPE;
 import static nl.everlutions.wifichat.services.ServiceMain.ACTIVITY_MESSAGE_TYPE_CLIENT_JOINED;
 import static nl.everlutions.wifichat.services.ServiceMain.ACTIVITY_MESSAGE_TYPE_SHOW_CHAT;
-import static nl.everlutions.wifichat.services.ServiceMain.FILTER_TO_SERVICE;
+import static nl.everlutions.wifichat.services.ServiceMain.FILTER_TO_SERVICE_AUDIO;
+import static nl.everlutions.wifichat.services.ServiceMain.FILTER_TO_SERVICE_NSD_COMMUNICATION;
 import static nl.everlutions.wifichat.services.ServiceMain.SERVICE_MESSAGE_HOST_NAME;
 import static nl.everlutions.wifichat.services.ServiceMain.SERVICE_MESSAGE_TYPE;
 import static nl.everlutions.wifichat.services.ServiceMain.SERVICE_MESSAGE_TYPE_HOST;
+import static nl.everlutions.wifichat.services.ServiceMain.SERVICE_MESSAGE_TYPE_PLAY_LOCAL;
+import static nl.everlutions.wifichat.services.ServiceMain.SERVICE_MESSAGE_TYPE_RECORD_LOCAL;
 import static nl.everlutions.wifichat.services.ServiceMain.SERVICE_MESSAGE_TYPE_SEND_COMMAND_CHAT;
 import static nl.everlutions.wifichat.services.ServiceMain.SERVICE_MESSAGE_TYPE_STOP_HOST;
 import static nl.everlutions.wifichat.services.ServiceMain.SERVICE_RESULT;
@@ -57,7 +61,7 @@ public class HostActivity extends AppCompatActivity {
             hostName = NSD_DEFAULT_HOST_NAME;
         }
 
-        Intent intent = new Intent(FILTER_TO_SERVICE);
+        Intent intent = new Intent(FILTER_TO_SERVICE_NSD_COMMUNICATION);
         intent.putExtra(SERVICE_MESSAGE_TYPE, SERVICE_MESSAGE_TYPE_HOST);
         intent.putExtra(SERVICE_MESSAGE_HOST_NAME, hostName);
 
@@ -80,6 +84,20 @@ public class HostActivity extends AppCompatActivity {
             addToTextLine(input);
             mHostChatInputView.setText("");
         }
+    }
+
+    @OnClick(R.id.host_record_local)
+    public void onRecordLocalClicked(View view) {
+        Intent intent = new Intent(FILTER_TO_SERVICE_AUDIO);
+        intent.putExtra(SERVICE_MESSAGE_TYPE, SERVICE_MESSAGE_TYPE_RECORD_LOCAL);
+        mBroadCastManager.sendBroadcast(intent);
+    }
+
+    @OnClick(R.id.host_play_local)
+    public void onPlayLocalClicked(View view) {
+        Intent intent = new Intent(FILTER_TO_SERVICE_AUDIO);
+        intent.putExtra(SERVICE_MESSAGE_TYPE, SERVICE_MESSAGE_TYPE_PLAY_LOCAL);
+        mBroadCastManager.sendBroadcast(intent);
     }
 
     private void addToTextLine(String input) {
@@ -106,7 +124,7 @@ public class HostActivity extends AppCompatActivity {
     }
 
     private void sendMessageToClients(String input) {
-        Intent intent = new Intent(FILTER_TO_SERVICE);
+        Intent intent = new Intent(FILTER_TO_SERVICE_NSD_COMMUNICATION);
         intent.putExtra(SERVICE_MESSAGE_TYPE, SERVICE_MESSAGE_TYPE_SEND_COMMAND_CHAT);
         intent.putExtra(SERVICE_RESULT, input);
         mBroadCastManager.sendBroadcast(intent);
@@ -129,7 +147,7 @@ public class HostActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         Log.e(TAG, "onDestroy: ");
-        Intent intent = new Intent(FILTER_TO_SERVICE);
+        Intent intent = new Intent(FILTER_TO_SERVICE_NSD_COMMUNICATION);
         intent.putExtra(SERVICE_MESSAGE_TYPE, SERVICE_MESSAGE_TYPE_STOP_HOST);
         mBroadCastManager.sendBroadcast(intent);
         super.onDestroy();

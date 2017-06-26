@@ -26,8 +26,10 @@ public class ServiceMain extends Service {
     private LocalBroadcastManager mBroadCastManager;
     private BroadcastReceiver mBroadCastReceiver;
 
-    static final public String FILTER_TO_SERVICE = "nl.everlutions.wifichat.services.FILTER_TO_SERVICE";
-    static final public String FILTER_SERVICE_DISCOVERY = "nl.everlutions.wifichat.services.FILTER_SERVICE_DISCOVERY";
+    static final public String FILTER_TO_SERVICE_MAIN = "nl.everlutions.wifichat.services.FILTER_TO_SERVICE_MAIN";
+    static final public String FILTER_TO_SERVICE_NSD_COMMUNICATION = "nl.everlutions.wifichat.services.FILTER_TO_SERVICE_NSD_COMMUNICATION";
+    static final public String FILTER_TO_SERVICE_AUDIO = "nl.everlutions.wifichat.services.FILTER_TO_SERVICE_AUDIO";
+    static final public String FILTER_TO_SERVICE_DISCOVERY = "nl.everlutions.wifichat.services.FILTER_TO_SERVICE_DISCOVERY";
     static final public String FILTER_TO_UI = "nl.everlutions.wifichat.services.FILTER_TO_UI";
 
     static final public String ACTIVITY_MESSAGE_RESULT = "nl.everlutions.wifichat.services.ACTIVITY_MESSAGE_RESULT";
@@ -45,7 +47,8 @@ public class ServiceMain extends Service {
     static final public String SERVICE_MESSAGE_TYPE_JOIN = "nl.everlutions.wifichat.services.SERVICE_MESSAGE_TYPE_JOIN";
     static final public String SERVICE_MESSAGE_TYPE_SEND_REQUEST_CHAT = "nl.everlutions.wifichat.services.SERVICE_MESSAGE_TYPE_SEND_REQUEST_CHAT";
     static final public String SERVICE_MESSAGE_TYPE_SEND_COMMAND_CHAT = "nl.everlutions.wifichat.services.SERVICE_MESSAGE_TYPE_SEND_COMMAND_CHAT";
-
+    static final public String SERVICE_MESSAGE_TYPE_RECORD_LOCAL = "nl.everlutions.wifichat.services.SERVICE_MESSAGE_TYPE_RECORD_LOCAL";
+    static final public String SERVICE_MESSAGE_TYPE_PLAY_LOCAL = "nl.everlutions.wifichat.services.SERVICE_MESSAGE_TYPE_PLAY_LOCAL";
 
     static final public String SERVICE_MESSAGE_HOST_NAME = "nl.everlutions.wifichat.services.SERVICE_MESSAGE_HOST_NAME";
 
@@ -72,7 +75,7 @@ public class ServiceMain extends Service {
         };
 
 
-        mServiceAudioSample = new ServiceAudioSample();
+        mServiceAudioSample = new ServiceAudioSample(this);
         mServiceAudioCorrelatorPearson = new ServiceAudioCorrelatorPearson();
         mServiceNSDCommunication = new ServiceNSDCommunication(this);
         mServiceNSDRegister = new ServiceNSDRegister(this);
@@ -81,7 +84,7 @@ public class ServiceMain extends Service {
         mServiceNSDDiscovery.shouldStartDiscovery();
 
         LocalBroadcastManager.getInstance(this).registerReceiver((mBroadCastReceiver),
-                new IntentFilter(ServiceMain.FILTER_TO_SERVICE)
+                new IntentFilter(ServiceMain.FILTER_TO_SERVICE_MAIN)
         );
     }
 

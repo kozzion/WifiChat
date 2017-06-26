@@ -14,20 +14,19 @@ public class MessageHandlerAudioPlay implements IMessageHandlerByteArray {
 
     ServiceAudioSample mServiceAudioSample;
 
-    public MessageHandlerAudioPlay(ServiceAudioSample serviceAudioSample)
-    {
+    public MessageHandlerAudioPlay(ServiceAudioSample serviceAudioSample) {
         mServiceAudioSample = serviceAudioSample;
     }
 
     @Override
     public void handle(byte[] input) {
-        if(input.length % 2 != 0)        {
+        if (input.length % 2 != 0) {
             throw new RuntimeException("Not an audio message");
         }
 
         short[] shorts = new short[input.length / 2];
         // to turn bytes to shorts as either big endian or little endian.
         ByteBuffer.wrap(input).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().get(shorts);
-        mServiceAudioSample.mTranscoderPlay.transCode(shorts, shorts.length);
+//        mServiceAudioSample.mTranscoderPlay.transCodeStart(shorts, shorts.length);
     }
 }

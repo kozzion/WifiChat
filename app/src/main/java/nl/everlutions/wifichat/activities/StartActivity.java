@@ -125,7 +125,7 @@ public class StartActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         LocalBroadcastManager.getInstance(this).registerReceiver((mDiscoveryReciever),
-                new IntentFilter(ServiceMain.FILTER_SERVICE_DISCOVERY)
+                new IntentFilter(ServiceMain.FILTER_TO_SERVICE_DISCOVERY)
         );
     }
 

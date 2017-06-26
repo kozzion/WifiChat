@@ -1,47 +1,68 @@
 package nl.everlutions.wifichat.services;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.media.AudioTrack;
 import android.media.MediaRecorder;
 import android.os.Process;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 
 import nl.everlutions.wifichat.handler.ArrayTranscoderShortShort;
-import nl.everlutions.wifichat.handler.IMessageHandlerShortArray;
+
+import static nl.everlutions.wifichat.services.ServiceMain.SERVICE_MESSAGE_TYPE_PLAY_LOCAL;
+import static nl.everlutions.wifichat.services.ServiceMain.SERVICE_MESSAGE_TYPE_RECORD_LOCAL;
 
 /**
  * Created by jaapo on 26-5-2017.
  */
 
-public class ServiceAudioSample
-{
+public class ServiceAudioSample {
     private static final int SAMPLE_RATE = 44100;
     private static final int QUEUE_CAPACITY = 1000;
+    private static final int RECORD_QUEUE_CAPACITY = 1000;
+    private final BroadcastReceiver mBroadCastReceiver;
+    private final ServiceMain mServiceMain;
 
     public boolean mIsPlaying;
     public boolean mIsRecording;
 
-    private BlockingQueue<short []> mPlayQueue;
+    private ArrayBlockingQueue<short[]> mPlayQueue;
+    private ArrayBlockingQueue<short[]> mRecordQueue;
+
+    public ArrayTranscoderShortShort mTranscoderPlay;
 
     public int mBufferSizePlay;
     public int mBufferSizeRecord;
 
-    public ArrayTranscoderShortShort mTranscoderPlay;
 
     private final String TAG = this.getClass().getSimpleName();
-    public IMessageHandlerShortArray handlerRecord;
 
 
-    public ServiceAudioSample()
-    {
+    public ServiceAudioSample(ServiceMain serviceMain) {
+        mServiceMain = serviceMain;
+        mBroadCastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                handleServiceMessage(intent);
+            }
+        };
+
+        LocalBroadcastManager.getInstance(serviceMain).registerReceiver((mBroadCastReceiver),
+                new IntentFilter(ServiceMain.FILTER_TO_SERVICE_AUDIO)
+        );
+
         mIsPlaying = false;
         mIsRecording = false;
         mPlayQueue = new ArrayBlockingQueue<>(QUEUE_CAPACITY);
+        mRecordQueue = new ArrayBlockingQueue<>(RECORD_QUEUE_CAPACITY);
 
 
         mBufferSizeRecord = AudioRecord.getMinBufferSize(SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
@@ -54,8 +75,31 @@ public class ServiceAudioSample
             mBufferSizePlay = SAMPLE_RATE * 2;
         }
 
-        mTranscoderPlay = new ArrayTranscoderShortShort(mBufferSizePlay, mPlayQueue);
-        handlerRecord = null;
+    }
+
+    private void handleServiceMessage(Intent intent) {
+        String serviceMessageType = intent.getStringExtra(ServiceMain.SERVICE_MESSAGE_TYPE);
+        Log.e(TAG, "handleServiceMessage: " + serviceMessageType);
+        switch (serviceMessageType) {
+            case SERVICE_MESSAGE_TYPE_RECORD_LOCAL:
+                if (mIsRecording) {
+                    recordAudioStop();
+                } else {
+                    recordAudioStart();
+                }
+                break;
+            case SERVICE_MESSAGE_TYPE_PLAY_LOCAL:
+                if (mIsPlaying) {
+                    playAudioStop();
+                } else {
+                    mTranscoderPlay = new ArrayTranscoderShortShort(mRecordQueue, mBufferSizePlay, mPlayQueue);
+                    mTranscoderPlay.transCodeStart();
+                    playAudioStart();
+                }
+                break;
+            default:
+                Log.e(TAG, "service message NOT handled");
+        }
     }
 
 
@@ -64,10 +108,8 @@ public class ServiceAudioSample
     }
 
 
-    public void recordAudioStart()
-    {
-        if (!mIsRecording)
-        {
+    public void recordAudioStart() {
+        if (!mIsRecording) {
             mIsRecording = true;
             new Thread(new Runnable() {
                 @Override
@@ -93,9 +135,10 @@ public class ServiceAudioSample
                     while (mIsRecording) {
 
                         int toWriteCount = record.read(audioRecordBuffer, 0, audioRecordBuffer.length);
-                        short[] audioArray = new short [toWriteCount];
-                        System.arraycopy(audioRecordBuffer, 0, audioArray,0, toWriteCount);
-                        handlerRecord.handle(audioArray);
+                        short[] audioArray = new short[toWriteCount];
+                        System.arraycopy(audioRecordBuffer, 0, audioArray, 0, toWriteCount);
+                        mRecordQueue.offer(audioArray);
+                        Log.e(TAG, "mRecordQueue: " + mRecordQueue.size());
                     }
                     record.stop();
                     record.release();
@@ -109,7 +152,7 @@ public class ServiceAudioSample
     }
 
     public void playAudioStart() {
-        if(!mIsPlaying) {
+        if (!mIsPlaying) {
             mIsPlaying = true;
             new Thread(new Runnable() {
                 @Override
@@ -127,15 +170,13 @@ public class ServiceAudioSample
 
                     playTrack.play();
 
-                    Log.e(TAG,"Audio streaming started");
-                    Log.e(TAG,"mPlayQueue " + mPlayQueue.size());
-                    while (mIsPlaying)
-                    {
+                    Log.e(TAG, "Audio streaming started");
+                    Log.e(TAG, "mPlayQueue " + mPlayQueue.size());
+                    while (mIsPlaying) {
                         try {
-                            short []  buffer = mPlayQueue.take();
-                            if (mBufferSizePlay != buffer.length)
-                            {
-                                throw new RuntimeException("is: "  + buffer.length + " should be "  + mBufferSizePlay);
+                            short[] buffer = mPlayQueue.take();
+                            if (mBufferSizePlay != buffer.length) {
+                                throw new RuntimeException("is: " + buffer.length + " should be " + mBufferSizePlay);
                             }
                             playTrack.write(buffer, 0, buffer.length);
                         } catch (InterruptedException e) {
@@ -153,7 +194,6 @@ public class ServiceAudioSample
             }).start();
         }
     }
-
 
 
     public void onStop() {

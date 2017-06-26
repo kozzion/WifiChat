@@ -23,7 +23,7 @@ import static nl.everlutions.wifichat.IConstants.IKEY_NSD_SERVICE_NAME;
 import static nl.everlutions.wifichat.IConstants.NSD_DEFAULT_HOST_NAME;
 import static nl.everlutions.wifichat.services.ServiceMain.ACTIVITY_MESSAGE_TYPE;
 import static nl.everlutions.wifichat.services.ServiceMain.ACTIVITY_MESSAGE_TYPE_SHOW_CHAT;
-import static nl.everlutions.wifichat.services.ServiceMain.FILTER_TO_SERVICE;
+import static nl.everlutions.wifichat.services.ServiceMain.FILTER_TO_SERVICE_NSD_COMMUNICATION;
 import static nl.everlutions.wifichat.services.ServiceMain.SERVICE_MESSAGE_TYPE;
 import static nl.everlutions.wifichat.services.ServiceMain.SERVICE_MESSAGE_TYPE_JOIN;
 import static nl.everlutions.wifichat.services.ServiceMain.SERVICE_MESSAGE_TYPE_SEND_REQUEST_CHAT;
@@ -54,7 +54,7 @@ public class JoinActivity extends AppCompatActivity {
             nsdServiceName = NSD_DEFAULT_HOST_NAME;
         }
 
-        Intent intent = new Intent(FILTER_TO_SERVICE);
+        Intent intent = new Intent(FILTER_TO_SERVICE_NSD_COMMUNICATION);
         intent.putExtra(SERVICE_MESSAGE_TYPE, SERVICE_MESSAGE_TYPE_JOIN);
         intent.putExtra(SERVICE_RESULT, nsdServiceName);
 
@@ -109,7 +109,7 @@ public class JoinActivity extends AppCompatActivity {
     }
 
     private void sendMessageToService(String input) {
-        Intent intent = new Intent(FILTER_TO_SERVICE);
+        Intent intent = new Intent(FILTER_TO_SERVICE_NSD_COMMUNICATION);
         intent.putExtra(SERVICE_MESSAGE_TYPE, SERVICE_MESSAGE_TYPE_SEND_REQUEST_CHAT);
         intent.putExtra(SERVICE_RESULT, input);
         mBroadCastManager.sendBroadcast(intent);
